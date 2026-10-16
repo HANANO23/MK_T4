@@ -1,0 +1,1812 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>2026 매경테스트 최신 실전 모의고사 (80문항 완벽구현)</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-light: #eef2ff;
+      --bg-color: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-sub: #475569;
+      --border-color: #cbd5e1;
+      --correct-bg: #dcfce7;
+      --correct-border: #22c55e;
+      --correct-text: #14532d;
+      --wrong-bg: #fee2e2;
+      --wrong-border: #ef4444;
+      --wrong-text: #7f1d1d;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-header {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto 16px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .app-header h1 {
+      font-size: 1.25rem;
+      color: var(--text-main);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+    }
+
+    .btn-action:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background-color: #ef4444;
+      box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-secondary {
+      background-color: #64748b;
+    }
+
+    .btn-warning {
+      background-color: #d97706;
+      color: white;
+    }
+
+    .cbt-container {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+      flex: 1;
+    }
+
+    @media (max-width: 968px) {
+      .cbt-container {
+        grid-template-columns: 1fr;
+      }
+      body {
+        padding: 10px;
+      }
+    }
+
+    .question-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 520px;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .badge-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .category-badge {
+      background-color: var(--primary-light);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .mode-badge {
+      background-color: #fef2f2;
+      color: #ef4444;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: none;
+    }
+
+    .progress-text {
+      font-size: 0.95rem;
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+
+    .question-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      word-break: keep-all;
+      line-height: 1.6;
+      color: #1e293b;
+      white-space: pre-line;
+    }
+
+    .question-box {
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.65;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .option-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 18px;
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      background-color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      word-break: keep-all;
+      color: #334155;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .option-btn:hover:not(.correct):not(.wrong) {
+      background-color: #f8fafc;
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .option-btn.correct {
+      background-color: var(--correct-bg);
+      border-color: var(--correct-border);
+      color: var(--correct-text);
+      font-weight: 700;
+    }
+
+    .option-btn.wrong {
+      background-color: var(--wrong-bg);
+      border-color: var(--wrong-border);
+      color: var(--wrong-text);
+      font-weight: 700;
+    }
+
+    .explanation-box {
+      margin-top: 15px;
+      padding: 20px;
+      background-color: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      white-space: pre-line;
+      line-height: 1.7;
+      color: #166534;
+      font-size: 0.95rem;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .navigation-bar {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      padding: 12px 24px;
+      border: 1px solid var(--border-color);
+      background-color: #fff;
+      color: #334155;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    .keyboard-tip {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      text-align: center;
+      font-weight: 500;
+      width: 100%;
+    }
+
+    @media(min-width: 768px) {
+      .keyboard-tip { width: auto; }
+    }
+
+    .sidebar-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      height: fit-content;
+      position: sticky;
+      top: 16px;
+    }
+
+    .omr-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+
+    .omr-header h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .score-summary {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+
+    .omr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+      gap: 8px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .omr-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      background-color: #fff;
+      transition: all 0.15s;
+    }
+
+    .omr-item:hover {
+      border-color: var(--primary);
+      background-color: #f8fafc;
+    }
+
+    .omr-item.active {
+      border-color: var(--primary);
+      background-color: var(--primary-light);
+      font-weight: 700;
+      box-shadow: 0 0 0 1px var(--primary);
+    }
+
+    .status-badge {
+      font-size: 0.72rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .status-none { background: #f1f5f9; color: var(--text-sub); }
+    .status-correct { background: var(--correct-bg); color: var(--correct-text); }
+    .status-wrong { background: var(--wrong-bg); color: var(--wrong-text); }
+
+    @media (max-width: 768px) {
+      .question-card { padding: 18px; }
+      .app-header { padding: 12px 16px; }
+      .omr-grid { max-height: 350px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <h1>🎯 2026 매경테스트 최신 실전 모의고사 (80문항 완벽구현)</h1>
+    <div class="header-btns">
+      <button id="wrongOnlyBtn" class="btn-action btn-danger" onclick="filterWrongQuestions()">틀린 문제만 모아보기</button>
+      <button id="showAllBtn" class="btn-action btn-secondary" onclick="showAllQuestions()" style="display:none;">전체 문제 보기</button>
+      <button class="btn-action" onclick="resetAndShuffle()">리셋 & 순서 섞기</button>
+    </div>
+  </header>
+
+  <div class="cbt-container">
+    <main class="question-card">
+      <div>
+        <div class="question-header">
+          <div class="badge-group">
+            <span id="categoryBadge" class="category-badge">[분야] 매경TEST 모의고사</span>
+            <span id="modeBadge" class="mode-badge">오답 복습 모드</span>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="reselectBtn" class="btn-action btn-warning" style="display:none; padding: 6px 12px; font-size: 0.8rem;" onclick="reselectAnswer()">🔄 답 다시 선택</button>
+            <span class="progress-text"><strong id="currentIndex">1</strong> / <span id="totalIndex">80</span></span>
+          </div>
+        </div>
+
+        <div id="questionTitle" class="question-title"></div>
+        <div id="questionBox" class="question-box" style="display:none;"></div>
+        <div id="optionsList" class="options-list"></div>
+        <div id="explanationBox" class="explanation-box" style="display: none;"></div>
+      </div>
+
+      <div class="navigation-bar">
+        <button id="prevBtn" class="nav-btn" onclick="prevQuestion()">◀ 이전</button>
+        <span class="keyboard-tip">💡 정답 보기를 <strong>더블 클릭(더블 탭)</strong> 시 다음 문제로 바로 넘어갑니다</span>
+        <button id="nextBtn" class="nav-btn" onclick="nextQuestion()">다음 ▶</button>
+      </div>
+    </main>
+
+    <aside class="sidebar-card">
+      <div class="omr-header">
+        <h3>OMR 답안지</h3>
+        <span id="scoreSummary" class="score-summary">맞힘: 0 / 80</span>
+      </div>
+      <div id="omrGrid" class="omr-grid"></div>
+    </aside>
+  </div>
+
+  <script>
+    const originalQuestions = [
+      {
+        id: 1,
+        category: "[경영] 재무제표",
+        question: "01. 다음 중 당기순이익 중에서 현금으로 지급된 배당금 총액의 비율을 뜻하는 재무지표는?",
+        options: ["① 배당성향", "② 사내유보율", "③ 시가배당률", "④ 액면배당률", "⑤ 배당수익률"],
+        answer: 1,
+        explanation: "[정답 해설]\n• ① 배당성향 (정답): 당기순이익 중 현금배당으로 지급된 총액의 비율을 의미합니다.\n\n[오답 보기 해설]\n• ② 사내유보율: 당기순이익 중 사내에 유보(재투자 등)시키는 비율입니다.\n• ③ 시가배당률: 주가에 대한 1주당 배당금의 비율입니다.\n• ④ 액면배당률: 액면가에 대한 1주당 배당금의 비율입니다.\n• ⑤ 배당수익률: 현재 주가 대비 배당금이 차지하는 비율입니다."
+      },
+      {
+        id: 2,
+        category: "[경영] 조직구조",
+        question: "02. 다음 중 기업에서는 집중해야 하는 핵심역량만 보유하고 나머지 요소들은 아웃소싱을 통해 운영하는 조직구조는?",
+        options: ["① 기능 조직", "② 기계적 조직", "③ 사업부 조직", "④ 네트워크 조직", "⑤ 매트릭스 조직"],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ 네트워크 조직 (정답): 핵심 역량만 자체 보유하고 나머지는 외부 네트워크와 아웃소싱으로 연결하는 조직 형태입니다.\n\n[오답 보기 해설]\n• ① 기능 조직: 업무의 전문 기능별로 부서를 편성하는 전통적 구조입니다.\n• ② 기계적 조직: 공식화와 집권화가 높은 관료제적 성격의 조직입니다.\n• ③ 사업부 조직: 지역, 제품, 고객 등 사업 단위별로 독립된 조직을 구성하는 형태입니다.\n• ⑤ 매트릭스 조직: 기능 조직과 사업부 조직을 결합하여 이중 보고 체계를 갖춘 구조입니다."
+      },
+      {
+        id: 3,
+        category: "[경영] 자본구조",
+        question: "03. 다음 중 기업이 주주에게 일정한 보상을 주지 않고 주식을 소각해 자본잠식에서 벗어나는 방법은?",
+        options: ["① 유상증자", "② 무상증자", "③ 유상감자", "④ 무상감자", "⑤ 주식분할"],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ 무상감자 (정답): 결손금을 메우기 위해 주주에게 보상 없이 주식 수를 강제로 줄이는 감자 방식입니다.\n\n[오답 보기 해설]\n• ① 유상증자: 대금을 받고 새로운 주식을 발행하여 자본금을 늘리는 방식입니다.\n• ② 무상증자: 잉여금을 자본전입하여 주주에게 대가 없이 주식을 나누어주는 방식입니다.\n• ③ 유상감자: 주주에게 보상을 지급하고 주식 수를 줄이는 방식입니다.\n• ⑤ 주식분할: 자본금 변동 없이 기존 주식을 쪼개어 유통 주식 수를 늘리는 것입니다."
+      },
+      {
+        id: 4,
+        category: "[경영] 증권시장",
+        question: "04. 다음 중 기업규모, 매출액 등에서 우량 종목이 많이 상장된 순으로 증권시장을 올바르게 나열한 것은?",
+        options: [
+          "① 코스닥시장 > 유가증권시장 > 코넥스",
+          "② 코스닥시장 > 코넥스 > 유가증권시장",
+          "③ 유가증권시장 > 코스닥시장 > 코넥스",
+          "④ 유가증권시장 > 코넥스 > 코스닥시장",
+          "⑤ 코넥스 > 유가증권시장 > 코스닥시장"
+        ],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 유가증권시장 > 코스닥시장 > 코넥스 (정답): 대기업 중심의 유가증권시장(KOSPI), 중견·벤처기업 중심의 코스닥, 초기 중소기업 중심의 코넥스 순입니다.\n\n[오답 보기 해설]\n• ①, ②, ④, ⑤: 규모와 요건 순서가 잘못 나열되었습니다."
+      },
+      {
+        id: 5,
+        category: "[경영] 리더십",
+        question: "05. 리더십 관리격자도모형에서 사람에는 높은 관심을 보이지만 과업에는 낮은 관심을 보이는 리더의 유형으로 가장 올바른 것은?",
+        options: ["① 팀형", "② 중도형", "③ 과업형", "④ 무관심형", "⑤ 컨트리클럽형"],
+        answer: 5,
+        explanation: "[정답 해설]\n• ⑤ 컨트리클럽형 (정답): (1,9) 유형으로 사람에 대한 관심은 극대화하고 과업 생산성은 경시하는 유형입니다.\n\n[오답 보기 해설]\n• ① 팀형: 사람과 과업 모두에 대한 관심이 최고 수준인 (9,9) 유형입니다.\n• ② 중도형: 사람과 과업 모두 중간 수준인 (5,5) 유형입니다.\n• ③ 과업형: 과업에만 극도로 치중하고 사람은 무시하는 (9,1) 유형입니다.\n• ④ 무관심형: 사람과 과업 모두 관심이 없는 (1,1) 유형입니다."
+      },
+      {
+        id: 6,
+        category: "[경영] 이사회",
+        question: "06. 다음 중 주식회사의 대표적인 기관인 이사회에 대한 올바른 설명으로 가장 거리가 먼 것은?",
+        options: [
+          "① 기업의 최대주주를 선임할 수 있다.",
+          "② 자금 조달 방법에 대한 의사결정을 한다.",
+          "③ 경영진의 업무 진행에 대한 감독을 한다.",
+          "④ 주총에서 권한을 위임받은 상설 기관이다.",
+          "⑤ 일정 규모 이상의 기업은 사외이사를 둔다."
+        ],
+        answer: 1,
+        explanation: "[정답 해설]\n• ① 기업의 최대주주를 선임할 수 있다 (정답-거리가 먼 것): 최대주주는 주식 소유 비율에 따라 자연스럽게 결정되는 지위이므로 이사회가 선임할 수 없습니다.\n\n[오답 보기 해설]\n• ②, ③, ④, ⑤: 이사회는 회사의 중요 경영 의사결정, 업무 집행 감독, 주총 위임 사항 처리 및 사외이사 선임 요건 등을 담당합니다."
+      },
+      {
+        id: 7,
+        category: "[경영] 금융상품",
+        question: "07. 아래에서 설명하는 이것은?",
+        boxContent: "이것은 물건을 가지고 있지도 않은 상태에서 판다는 의미로 주식시장에서 주식을 가지고 있지 않은 상태에서 매도 주문을 내는 것을 말한다. 이것은 주가가 떨어질 것을 예상할 때 시세차익을 노리는 방법이다. 결제 불이행을 막기 위해 일정한 증거금을 요구한다.",
+        options: ["① 공매도", "② 배당락", "③ 미수거래", "④ 선물옵션", "⑤ 헤지펀드"],
+        answer: 1,
+        explanation: "[정답 해설]\n• ① 공매도 (정답): 주식을 빌려서 먼저 매도한 후, 향후 주가 하락 시 싼 가격에 사서 갚아 차익을 얻는 기법입니다.\n\n[오답 보기 해설]\n• ② 배당락: 배당 기준일이 지나 배당을 받을 권리가 소멸하는 시점입니다.\n• ③ 미수거래: 증권사로부터 돈을 일부 빌려 주식을 매수한 뒤 결제일에 대금을 갚는 거래입니다.\n• ④ 선물옵션: 미래의 특정 시점에 자산을 사거나 팔 수 있는 파생상품 권리/계약입니다.\n• ⑤ 헤지펀드: 위험을 최소화하면서 고수익을 추구하는 사모펀드입니다."
+      },
+      {
+        id: 8,
+        category: "[경영] 국제경영",
+        question: "08. 다음 중 다국적 기업이 현지 기업들과의 제휴로 얻을 수 있는 기대 효과로 가장 거리가 먼 것은?",
+        options: [
+          "① 비용이나 위험을 분담",
+          "② 신속한 현지 시장 진입",
+          "③ 시장의 기술 표준 확보",
+          "④ 기술적 노하우 유출 방지",
+          "⑤ 현지 자원과 지식의 습득"
+        ],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ 기술적 노하우 유출 방지 (정답-거리가 먼 것): 제휴(파트너십)를 맺으면 오히려 자사의 핵심 기술과 노하우가 파트너사로 유출될 위험이 커집니다.\n\n[오답 보기 해설]\n• ①, ②, ③, ⑤: 제휴를 통해 비용 분담, 신속한 진입, 표준 선점, 현지 지식 습득의 이점을 얻습니다."
+      },
+      {
+        id: 9,
+        category: "[경영] 해외진출",
+        question: "09. 다음 중 기업의 내부화 정도가 가장 강한 해외시장 진출 방식은?",
+        options: ["① 간접수출", "② 단독투자", "③ 라이선싱", "④ 합작투자", "⑤ 전략적 제휴"],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② 단독투자 (정답): 100% 지분을 소유하고 독자적으로 자회사나 공장을 세우므로 내부화 수준과 통제력이 가장 높습니다.\n\n[오답 보기 해설]\n• ① 간접수출: 중개상을 통하므로 내부화가 거의 이루어지지 않습니다.\n• ③ 라이선싱: 기술을 타사에 대여해 주므로 내부화 정도가 낮습니다.\n• ④ 합작투자: 현지 기업과 지분을 공유하는 형태입니다.\n• ⑤ 전략적 제휴: 계약 기반의 제휴로 독립성을 유지합니다."
+      },
+      {
+        id: 10,
+        category: "[경영] 생산관리",
+        question: "10. 다음 중 JIT(Just In Time)의 특징으로 올바른 것은?",
+        options: [
+          "① 안전재고 유지",
+          "② 칸반(kanban)방식 등으로 관리",
+          "③ 작업배정 순서에 따른 통제",
+          "④ Push시스템에 따른 자재계획",
+          "⑤ 대규모 로트(lot) 크기"
+        ],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② 칸반(kanban)방식 등으로 관리 (정답): JIT 생산방식은 낭비 요소를 제거하기 위해 칸반 카드를 활용한 적기 생산을 추구합니다.\n\n[오답 보기 해설]\n• ① 안전재고 유지: JIT는 무재고(Zero Inventory)를 지향합니다.\n• ③, ④ Push시스템: JIT는 수요에 맞춰 생산하는 Pull 시스템입니다.\n• ⑤ 대규모 로트 크기: JIT는 소규모 로트 생산을 지향합니다."
+      },
+      {
+        id: 11,
+        category: "[경영] 마케팅",
+        question: "11. 다음 중 어떤 상품에 대해 소비자가 관심을 갖는 정도나 중요하게 여기는 정도를 일컫는 마케팅 개념은?",
+        options: ["① 관여도", "② 포지셔닝", "③ 브랜드", "④ 구매 후 행동", "⑤ 고객생애가치"],
+        answer: 1,
+        explanation: "[정답 해설]\n• ① 관여도 (정답): 소비자가 특정 구매 상황에서 느끼는 중요성이나 관심의 정도를 말합니다.\n\n[오답 보기 해설]\n• ② 포지셔닝: 소비자의 마음에 자사 제품의 차별적 위치를 심어주는 활동입니다.\n• ③ 브랜드: 제품이나 서비스를 식별하는 이름, 상징 등의 총합입니다.\n• ④ 구매 후 행동: 제품 구매 후 소비자의 만족 또는 불만족 반응입니다.\n• ⑤ 고객생애가치: 고객이 거래 기간 동안 기업에 창출하는 총 가치입니다."
+      },
+      {
+        id: 12,
+        category: "[경영] 회계기준",
+        question: "12. 다음 중 한국채택국제회계기준(K-IFRS)의 재무제표에 해당하지 않는 것은?",
+        options: ["① 손익계산서", "② 재무상태표", "③ 자본변동표", "④ 현금흐름표", "⑤ 세금계산서"],
+        answer: 5,
+        explanation: "[정답 해설]\n• ⑤ 세금계산서 (정답): 세금계산서는 거래 증빙용 세무 서류이며 K-IFRS 재무제표 5가지에 해당하지 않습니다.\n\n[오답 보기 해설]\n• ① 손익계산서, ② 재무상태표, ③ 자본변동표, ④ 현금흐름표는 모두 K-IFRS 공식 재무제표(주석 포함)입니다."
+      },
+      {
+        id: 13,
+        category: "[경영] 제품개발",
+        question: "13. 다음 중 제품개발 부서 간 의사소통을 원활하게 하고, 고객의 요구를 기술적 특성으로 전환함으로써 설계과정에 고객의 요구가 반영될 수 있도록 하는 제품설계과정 개선기법은?",
+        options: ["① 가치분석", "② 동시설계", "③ 품질기능전개", "④ 제조용이성설계", "⑤ 환경친화형설계"],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 품질기능전개 (정답): QFD(Quality Function Deployment)는 고객의 소리를 기술적 요구사항으로 변환하는 대표적 설계 기법입니다.\n\n[오답 보기 해설]\n• ① 가치분석: 제품의 원가 대비 기능을 분석하여 가치를 높이는 기법입니다.\n• ② 동시설계: 제품 개발의 여러 단계를 병렬로 수행하는 방식입니다.\n• ④ 제조용이성설계: 제조하기 쉽도록 제품을 설계하는 것입니다.\n• ⑤ 환경친화형설계: 환경 영향을 고려한 친환경 설계입니다."
+      },
+      {
+        id: 14,
+        category: "[경영] 가치사슬",
+        question: "14. 기업활동에서 부가가치가 생성되는 과정을 가치사슬(Value Chain)이라고 한다. 가치사슬은 주(Primary) 활동과 보조(Support) 활동으로 구분된다. 다음 중 가치사슬의 보조 활동으로 가장 거리가 먼 것은?",
+        options: [
+          "① 향후 시장을 선도할 수 있는 신기술 개발 활동",
+          "② 직원들의 성과 평가 및 보상 체계를 설계하는 활동",
+          "③ 새로운 브랜드 이미지를 개발해 소비자에게 알리는 활동",
+          "④ 새로운 사업을 기획하고 수익성을 평가해 재원을 조달하는 활동",
+          "⑤ 시장에 유통되는 모방품에 대응하기 위한 법률 검토와 소송활동"
+        ],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 새로운 브랜드 이미지를 개발해 소비자에게 알리는 활동 (정답-거리가 먼 것): 마케팅 및 판매 활동은 주 활동(Primary Activities)에 해당합니다.\n\n[오답 보기 해설]\n• ① 기술개발, ② 인적자원관리, ④ 하부구조(재무·기획), ⑤ 조달 등은 모두 보조 활동입니다."
+      },
+      {
+        id: 15,
+        category: "[경영] 마케팅",
+        question: "15. 고객과의 직접 대화를 통해서 자사의 제품이나 서비스를 구매하도록 설득하는 활동을 인적판매라고 한다. 다음 중 인적판매의 장점에 올바른 설명으로 가장 거리가 먼 것은?",
+        options: [
+          "① 고객의 구매욕구 자극에 효과적이다.",
+          "② 고객의 상황을 관찰하고 대처가 가능하다.",
+          "③ 고객에게 제품과 서비스에 대한 많은 정보를 전달할 수 있다.",
+          "④ 즉각적으로 고객의 반응을 파악할 수 있고 피드백도 가능하다.",
+          "⑤ 촉진수단 중 비용이 적게 들어 상대적으로 넓은 시장에 대응 가능하다."
+        ],
+        answer: 5,
+        explanation: "[정답 해설]\n• ⑤ 촉진수단 중 비용이 적게 들어 상대적으로 넓은 시장에 대응 가능하다 (정답-거리가 먼 것): 인적판매는 대면 접촉 중심이므로 접촉당 비용이 매우 많이 듭니다.\n\n[오답 보기 해설]\n• ①, ②, ③, ④: 대면 소통의 특성상 구매욕구 자극, 맞춤 대처, 풍부한 정보 전달, 즉각적 피드백이 장점입니다."
+      },
+      {
+        id: 16,
+        category: "[경영] ESG경영",
+        question: "16. 아래 기사의 빈칸 (A), (B)에 들어갈 ESG 항목을 올바르게 짝지은 것은?",
+        boxContent: "SK케미칼이 ESG경영을 도입한 지 15년째인 가운데 '지구의 환경과 인류의 건강을 보호한다'는 기업의 미션과 비전을 수립했다. 그 결과 ESG평가에서 (A) 부문은 83.05점으로 A등급이다. 가령 지난해 5월 청주 내 결식우려 아동들을 위해 '행복두끼 프로젝트'에 참여하는 등 활발한 지역 사회 공헌 활동을 전개하고 있다. 한편 (B) 부문은 A+등급(87.4점)으로... '주주' 분야가 가장 높은 점수를 받았으며, '이사회' 및 '감사' 분야도 높은 평가를 받았다.",
+        options: [
+          "① A: E(Environment) / B: S(Social)",
+          "② A: E(Environment) / B: G(Governance)",
+          "③ A: S(Social) / B: E(Environment)",
+          "④ A: S(Social) / B: G(Governance)",
+          "⑤ A: G(Governance) / B: S(Social)"
+        ],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ A: S(Social) / B: G(Governance) (정답): 지역사회 공헌은 사회적 책임(S), 주주·이사회·감사는 지배구조(G)에 해당합니다.\n\n[오답 보기 해설]\n• ①, ②, ③, ⑤: 각 지문의 내용과 ESG 요소를 잘못 매칭한 오답입니다."
+      },
+      {
+        id: 17,
+        category: "[경영] 인사평가",
+        question: "17. 아래 자료에 해당하는 인사평가의 오류는?",
+        boxContent: "A사는 IT 개발자를 채용하기 위해 인터뷰를 진행하였다. 지원자 중 K씨는 학벌이 매우 뛰어나고, 이전 직장에서 유명 프로젝트를 성공적으로 마친 경력이 있다. 이를 본 면접관은 첫인상에서 이 지원자에게 매우 긍정적인 인상을 받았다. 하지만 실제 인터뷰 과정에서 K씨는 여러 기술적 질문에 명확히 답하지 못했고, 팀워크에 대한 이해도도 부족한 모습을 보였다. 그럼에도 불구하고 첫인상에 큰 영향을 받아 이 지원자를 채용하기로 결정하였다.",
+        options: ["① 후광효과(Halo Effect)", "② 최근효과(Recent Effect)", "③ 낙인효과(Stigma Effect)", "④ 유사성효과(Similarity Effect)", "⑤ 관대화 경향((Leniency Tendency)"],
+        answer: 1,
+        explanation: "[정답 해설]\n• ① 후광효과(Halo Effect) (정답): 하나의 두드러진 특성(학벌, 첫인상 등)에 사로잡혀 전체 평가를 긍정적으로 왜곡하는 오류입니다.\n\n[오답 보기 해설]\n• ② 최근효과: 평가 직전의 최근 기억이나 사건에 크게 의존하는 오류입니다.\n• ③ 낙인효과: 한 번의 부정적 요인으로 지속적인 나쁜 평가를 내리는 것입니다.\n• ④ 유사성효과: 평가자와 닮은 점이 있는 피평가자에게 후한 점수를 주는 것입니다.\n• ⑤ 관대화 경향: 전반적으로 모든 평가 대상자에게 후한 점수를 주는 경향입니다."
+      },
+      {
+        id: 18,
+        category: "[경영] 성과지표",
+        question: "18. 아래 기사의 빈칸 (A)에 들어갈 용어는?",
+        boxContent: "4대 시중은행이 잇따라 영업점의 (A) 개편에 나섰다. (A)는 회사의 목표를 성공적으로 달성하기 위해 핵심적으로 관리해야 하는 요소들에 대한 성과지표를 말한다. 개편 방향은 원금 손실 위험이 큰 상품의 판매 비중에 상한을 정하고 고령자를 대상으로 한 판매 실적은 평가에서 제외하는 식이다.",
+        options: ["① BPS", "② DPS", "③ EPS", "④ EVA", "⑤ KPI"],
+        answer: 5,
+        explanation: "[정답 해설]\n• ⑤ KPI (정답): 핵심성과지표(Key Performance Indicator)로 기업 목표 달성을 위한 핵심 성과 관리 지표입니다.\n\n[오답 보기 해설]\n• ① BPS: 주당순자산가치입니다.\n• ② DPS: 1주당 배당금입니다.\n• ③ EPS: 주당순이익입니다.\n• ④ EVA: 경제적 부가가치입니다."
+      },
+      {
+        id: 19,
+        category: "[경영] 자금조달",
+        question: "19. 아래 기사의 빈칸 (A)에 들어갈 기업의 자금조달 방식으로 가장 올바른 것은?",
+        boxContent: "채권 조달 환경이 악화되면서 카드사와 캐피털사가 (A) 발행 시장으로 발걸음을 옮기고 있다. (A)는 기업이 단기자금조달을 목적으로 만기 1년이내로 발행하는 어음 형식의 단기채권이다.",
+        options: ["① 교환사채", "② 영구채", "③ 표지어음", "④ 기업어음", "⑤ 신주인수권부사채"],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ 기업어음 (정답): CP(Commercial Paper)는 기업이 단기 자금 조달을 목적으로 발행하는 무담보 단기 어음입니다.\n\n[오답 보기 해설]\n• ① 교환사채: 타사 주식으로 교환 가능한 채권입니다.\n• ② 영구채: 만기가 없거나 매우 긴 자본성 채권입니다.\n• ③ 표지어음: 금융기관이 매매하는 어음입니다.\n• ⑤ 신주인수권부사채: 신주를 인수할 수 있는 권리가 부여된 채권입니다."
+      },
+      {
+        id: 20,
+        category: "[경영] 조직문화",
+        question: "20. 아래 자료의 기업 조직에 대한 올바른 설명으로 가장 적절한 것은?",
+        boxContent: "운동 라이프스타일 플랫폼 기업 브랜드엑스피트니스는 최근 MZ세대 직원들을 위한 맞춤형 복지 문화 '내 마음대로 하소(H.A.S.O.)'를 도입했다. 브랜드엑스피트니스는 수평적이고 서로를 존중하는 조직 문화 위해 직급에 관계없이 호칭을 '님'으로 통일했다. 또한 자율성을 기반으로 오전 9시 30분부터 11시 30분 사이에 자유롭게 출근하는 '내 마음대로 출퇴근' 제도를 실시해 직원들의 컨디션을 배려하고 업무의 효율성을 극대화시켰다.",
+        options: ["① 높은 공식화", "② 넓은 통제범위", "③ 명령 일원화 원칙", "④ 소품종 대량생산 체제", "⑤ 집권화된 의사결정 체계"],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② 넓은 통제범위 (정답): 수평적이고 자율적인 조직 문화에서는 중간 관리자의 간섭이 줄어들고 관리자가 통제하는 부하 직원의 범위(통제범위)가 넓어집니다.\n\n[오답 보기 해설]\n• ① 높은 공식화: 규칙과 절차가 촘촘한 관료제적 특징입니다.\n• ③ 명령 일원화 원칙: 한 명의 상사에게만 보고하는 전통적 원칙입니다.\n• ④ 소품종 대량생산: 제조업 생산 방식입니다.\n• ⑤ 집권화된 의사결정: 권한이 상층부에 집중된 구조입니다."
+      },
+      {
+        id: 21,
+        category: "[경영] 재무관리",
+        question: "21. 위 기사의 빈칸 (A)에 들어갈 용어로 가장 올바른 것은?",
+        boxContent: "[기사내용] AI테크기업 K사는 유통 주식 수 증가를 통한 주식 거래 활성화를 위해 보통주 1주당 가액을 1,000원에서 500원으로 분할하는 (A)를(을) 결정했다고 밝혔다. 이에 따라 발행 주식 총수는 분할 전 446만8509주에서 분할 후 893만7018주로 늘어날 예정이다.",
+        options: ["① 배당락", "② 유상증자", "③ 액면분할", "④ 주식병합", "⑤ 자사주 매입"],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 액면분할 (정답): 주식의 액면가를 쪼개어 유통 주식 수를 늘리는 조치입니다.\n\n[오답 보기 해설]\n• ① 배당락: 배당 권리 소멸 시점입니다.\n• ② 유상증자: 대금을 받고 신주를 발행하는 것입니다.\n• ④ 주식병합: 여러 주식을 합쳐서 주식 수를 줄이는 것입니다.\n• ⑤ 자사주 매입: 회사가 자기 회사 주식을 사들이는 것입니다."
+      },
+      {
+        id: 22,
+        category: "[경영] 재무제표",
+        question: "22. 위 기사의 빈칸 (A)가(이) K사의 재무제표에 미치는 영향에 대한 가장 올바른 설명은?",
+        options: [
+          "① 현금이 증가한다.",
+          "② 부채비율이 하락한다.",
+          "③ 주당순이익(EPS)이 상승한다.",
+          "④ 자기자본 금액은 변함이 없다.",
+          "⑤ 주당순자산가치(BPS)가 상승한다."
+        ],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ 자기자본 금액은 변함이 없다 (정답): 액면분할은 단순한 주식 가액 쪼개기이므로 자본금 총액 및 자기자본은 변하지 않습니다.\n\n[오답 보기 해설]\n• ① 현금이 유입되지 않습니다.\n• ② 부채와 자본 총액 변화가 없어 부채비율도 일정합니다.\n• ③ 주식 수가 늘어나 EPS와 BPS는 희석되어 낮아집니다."
+      },
+      {
+        id: 23,
+        category: "[경영] 인사선발",
+        question: "23. 기업의 인력 선발 과정에서 핵심적인 절차는 선발 방법에 대한 신뢰성과 타당성을 검증하는 단계이다. 아래 [보기]에서 타당성이 높은 상태를 올바르게 형상화한 것을 모두 고르면?",
+        boxContent: `
+          <div style="background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; max-width: 380px; margin: 0 auto;">
+            <div style="font-weight: bold; text-align: center; margin-bottom: 10px; font-size: 0.9rem;">[ 보기 ]</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: center;">
+              <div style="border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; background: #f8fafc; position: relative;">
+                <div style="position: absolute; top: 6px; left: 8px; font-weight: bold; font-size: 0.8rem; background: #e2e8f0; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">A</div>
+                <div style="width: 100px; height: 100px; border: 1.5px solid #64748b; border-radius: 50%; margin: 0 auto; position: relative; display: flex; align-items: center; justify-content: center; background: #fff;">
+                  <div style="width: 66px; height: 66px; border: 1.5px solid #64748b; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <div style="width: 33px; height: 33px; border: 1.5px solid #64748b; border-radius: 50%; background: #e2e8f0; font-size: 0.7rem; font-weight: bold; display: flex; align-items: center; justify-content: center;">A</div>
+                  </div>
+                  <div style="position: absolute; top: 10px; left: 42px; font-size: 10px;">● ● ●</div>
+                </div>
+              </div>
+              <div style="border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; background: #f8fafc; position: relative;">
+                <div style="position: absolute; top: 6px; left: 8px; font-weight: bold; font-size: 0.8rem; background: #e2e8f0; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">B</div>
+                <div style="width: 100px; height: 100px; border: 1.5px solid #64748b; border-radius: 50%; margin: 0 auto; position: relative; display: flex; align-items: center; justify-content: center; background: #fff;">
+                  <div style="width: 66px; height: 66px; border: 1.5px solid #64748b; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <div style="width: 33px; height: 33px; border: 1.5px solid #64748b; border-radius: 50%; background: #e2e8f0; font-size: 0.7rem; font-weight: bold; display: flex; align-items: center; justify-content: center;">B</div>
+                  </div>
+                  <div style="position: absolute; top: 40px; left: 38px; font-size: 10px;">● ● ●<br>● ●</div>
+                </div>
+              </div>
+              <div style="border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; background: #f8fafc; position: relative;">
+                <div style="position: absolute; top: 6px; left: 8px; font-weight: bold; font-size: 0.8rem; background: #e2e8f0; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">C</div>
+                <div style="width: 100px; height: 100px; border: 1.5px solid #64748b; border-radius: 50%; margin: 0 auto; position: relative; display: flex; align-items: center; justify-content: center; background: #fff;">
+                  <div style="width: 66px; height: 66px; border: 1.5px solid #64748b; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <div style="width: 33px; height: 33px; border: 1.5px solid #64748b; border-radius: 50%; background: #e2e8f0; font-size: 0.7rem; font-weight: bold; display: flex; align-items: center; justify-content: center;">C</div>
+                  </div>
+                  <div style="position: absolute; top: 35px; left: 20px; font-size: 9px;">● &nbsp; ● &nbsp; ● &nbsp; ●</div>
+                </div>
+              </div>
+              <div style="border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; background: #f8fafc; position: relative;">
+                <div style="position: absolute; top: 6px; left: 8px; font-weight: bold; font-size: 0.8rem; background: #e2e8f0; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">D</div>
+                <div style="width: 100px; height: 100px; border: 1.5px solid #64748b; border-radius: 50%; margin: 0 auto; position: relative; display: flex; align-items: center; justify-content: center; background: #fff;">
+                  <div style="width: 66px; height: 66px; border: 1.5px solid #64748b; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <div style="width: 33px; height: 33px; border: 1.5px solid #64748b; border-radius: 50%; background: #e2e8f0; font-size: 0.7rem; font-weight: bold; display: flex; align-items: center; justify-content: center;">D</div>
+                  </div>
+                  <div style="position: absolute; top: 5px; left: 10px; font-size: 9px;">● &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ●</div>
+                  <div style="position: absolute; bottom: 5px; left: 15px; font-size: 9px;">● &nbsp; ● &nbsp; ●</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `,
+        options: ["① A, B", "② A, D", "③ B, C", "④ B, D", "⑤ C, D"],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ B, C (정답): 타당성은 정중앙(목표)을 맞힌 상태(B, C)를 뜻합니다. (A는 신뢰성은 높으나 타당성 낮음, D는 신뢰성·타당성 모두 낮음)\n\n[오답 보기 해설]\n• ① A, B: A는 과녁 위쪽에 쏠려 타당성이 낮습니다.\n• ② A, D: A와 D 모두 타당성이 낮습니다.\n• ④ B, D: D는 타당성과 신뢰성이 모두 떨어집니다.\n• ⑤ C, D: D는 타당성이 없습니다."
+      },
+      {
+        id: 24,
+        category: "[경영] 국제경영",
+        question: "24. 아래 사례에서 등장하는 부사장 K와 사장 S가 주장하는 해외 시장 진출 방법을 각각 올바르게 연결한 것을 고르면?",
+        boxContent: "A사는 최근 베트남의 중산층 소비 시장의 성장에 따라 현지에 생산 공장을 마련할 계획을 세우고 있다. 이에 부사장 K는 생산 설비 구축 역량이 있는 업체에게 기획, 계획부터 설계 및 시공까지 일체를 맡기고 생산 개시 전에만 소유권을 넘겨받는 형태가 효율적이라고 주장한다. 하지만 사장 S는 현지에 이미 존재하는 공장과 관리업체 등을 인수하는 것이 더 신속한 시장 진출 방안이 아닌지 고민하고 있다.",
+        options: [
+          "① 부사장 K: 턴키 프로젝트<br>&nbsp;&nbsp;&nbsp;&nbsp;사장 S: 그린필드",
+          "② 부사장 K: 라이선싱<br>&nbsp;&nbsp;&nbsp;&nbsp;사장 S: 계약 생산",
+          "③ 부사장 K: 턴키 프로젝트<br>&nbsp;&nbsp;&nbsp;&nbsp;사장 S: 브라운필드",
+          "④ 부사장 K: 라이선싱<br>&nbsp;&nbsp;&nbsp;&nbsp;사장 S: 그린필드",
+          "⑤ 부사장 K: 프랜차이징<br>&nbsp;&nbsp;&nbsp;&nbsp;사장 S: 간접 수출"
+        ],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 부사장 K: 턴키 프로젝트 / 사장 S: 브라운필드 (정답): 설계·시공을 일괄 도급 맡기는 방식은 턴키, 기존 시설 인수는 브라운필드입니다.\n\n[오답 보기 해설]\n• ① 그린필드는 완전히 새로운 부지에 신설하는 방식입니다.\n• ②, ④, ⑤ 라이선싱, 프랜차이징, 계약생산, 간접수출 등의 매칭이 잘못되었습니다."
+      },
+      {
+        id: 25,
+        category: "[경영] 원가관리",
+        question: "25. A사는 달력 제조 회사이다. 이 회사의 달력 가격은 한 개당 1만 원이다. 변동비는 한 개당 4천 원이고, 월간 총고정비는 300만 원이다. A기업의 월간 손익분기점 판매량은?",
+        options: ["① 200개", "② 300개", "③ 400개", "④ 500개", "⑤ 600개"],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ 500개 (정답): 손익분기점(BEP) = 고정비 / (단가 - 단위당변동비) = 3,000,000 / (10,000 - 4,000) = 500개입니다.\n\n[오답 보기 해설]\n• ①, ②, ③, ⑤: 계산 공식 적용 오류로 도출된 오답입니다."
+      },
+      {
+        id: 26,
+        category: "[경영] 국제경영",
+        question: "26. 위의 ( A )에 해당하는 용어는?",
+        boxContent: "( A )는 분리된 기존의 국가 단위 시장이 하나의 시장으로 통합되는 것을 의미한다. 많은 산업영역에서 \"한국 시장\"이나 \"미국 시장\"과 같은 용어는 이미 그 의미가 퇴색했으며, 서로 다른 국가에 속한 소비자들의 기호와 취향이 범세계적 기준에 모여지는 현상이 발생한다. 또한 기업들은 국가마다 생산요소의 비용과 품질수준이 다른 점을 활용해 재화와 용역을 조달함으로써 전체 비용구조를 낮추거나 품질과 제품의 기능상을 향상시키고 있다. ( A )는 (가) ____________.",
+        options: ["① Cluster", "② Governance", "③ Localization", "④ Globalization", "⑤ Glocalization"],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ Globalization (정답): 국경을 넘어 하나의 단일 세계 시장으로 통합되는 현상은 세계화(Globalization)입니다.\n\n[오답 보기 해설]\n• ① Cluster: 산업 집적지를 의미합니다.\n• ② Governance: 기업이나 국가의 지배구조 및 관리 체계입니다.\n• ③ Localization: 현지화 전략입니다.\n• ⑤ Glocalization: 세계화와 현지화의 합성어입니다."
+      },
+      {
+        id: 27,
+        category: "[경영] 국제경영",
+        question: "27. 위의 밑줄 친 (가)에 들어갈 올바른 내용으로 가장 거리가 먼 것은?",
+        options: [
+          "① 하나의 공통된 세계규범이 세계시장에 광범위하게 적용되는 추세를 말한다.",
+          "② 무역규제 완화, 외환시장 개방 등 개별 국가 간 상호의존도 심화로 가속화됐다.",
+          "③ 정보통신 및 교통체계 발전으로 시간·공간적 격차가 압축되면서 촉진됐다.",
+          "④ 경쟁이 심화된 본국에서 벗어나 해외시장에 진출하는 기업이 늘어나는 현상을 말한다.",
+          "⑤ 외국기업과 전략적 제휴를 맺어 생산을 세계 각지로 분산하게 함으로써 기업의 비용 최적화에 기여한다."
+        ],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ 경쟁이 심화된 본국에서 벗어나 해외시장에 진출하는 기업이 늘어나는 현상을 말한다 (정답-거리가 먼 것): 이는 일반적인 해외 진출이나 다국적화의 단편적 설명이며 세계화 본질의 설명과는 거리가 멉니다.\n\n[오답 보기 해설]\n• ①, ②, ③, ⑤: 모두 세계화 현상의 가속화 배경과 특징을 올바르게 설명하고 있습니다."
+      },
+      {
+        id: 28,
+        category: "[경영] 경영전략",
+        question: "28. 아래 기사에 나타난 삼성전자의 경영전략은?",
+        boxContent: "초기에 삼성은 반도체·프로세스 등 아이폰의 핵심부품을 생산해 납품하는 하청업체에 불과했다. 삼성은 중간재 시장에서 기술력과 시장점유율을 키웠고, 반도체·디스플레이·센서·배터리·카메라 등에서 선도자로 자리 잡았다. 그러다 스마트폰 시장에 뛰어들어 글로벌 브랜드가 됐다. 삼성의 이 같은 전략이 성공할 수 있었던 이유는 스마트폰이 수많은 중간재의 결합체이기 때문이다. 즉, 부품의 조달과 조립이 사업의 승패를 결정하는데, 삼성은 핵심부품들을 자체 생산할 수 있었을 뿐만 아니라 글로벌 소비자 생산 기업들의 노하우를 보고 익혀 시행착오를 줄일 수 있었던 것이다.",
+        options: ["① 비관련다각화", "② 전방 수직계열화", "③ 후방 수직계열화", "④ 수평적 관련다각화", "⑤ 수평적 비관련다각화"],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② 전방 수직계열화 (정답): 부품(중간재) 공급업체가 완제품(최종 소비자 시장) 단계로 사업 영역을 확장하는 것은 전방 수직계열화입니다.\n\n[오답 보기 해설]\n• ① 비관련다각화: 전혀 연관 없는 산업으로 진출하는 것입니다.\n• ③ 후방 수직계열화: 완제품 업체가 원료나 부품 생산 단계로 거슬러 올라가는 것입니다.\n• ④, ⑤ 수평적 다각화: 유사 기술이나 시장의 다른 제품군으로 확장하는 것입니다."
+      },
+      {
+        id: 29,
+        category: "[경영] 마케팅",
+        question: "29. 기업은 신제품을 출시할 때 의도적으로 아주 높은 가격을 책정한 후 단계적으로 가격을 낮추는 가격전략을 취할 수 있다. 이러한 가격전략을 적용하기 적절한 사례를 [보기]에서 모두 고르면?",
+        boxContent: "[보기]<br>\n㉠ 모방이 어려운 차별적 신제품을 출시하는 글로벌 전기자동차 회사<br>\n㉡ 경쟁이 치열한 탄산음료 시장에 처음 제품을 출시하는 유제품 제조 회사<br>\n㉢ 인지도가 높고, 시장을 선도하는 브랜드로 신제품을 출시하는 노트북 제조 회사<br>\n㉣ 소비자의 선호가 동질적인 시장을 타깃으로 신제품을 출시하는 의류 제조 회사",
+        options: ["① ㉠, ㉢", "② ㉠, ㉣", "③ ㉡, ㉢", "④ ㉡, ㉣", "⑤ ㉢, ㉣"],
+        answer: 1,
+        explanation: "[정답 해설]\n• ① ㉠, ㉢ (정답): 초기고가격(Skimming) 전략은 독보적 차별성이 있거나 브랜드 충성도가 높아 초기에 고가 지불 의사가 있는 고객을 타깃으로 할 때 적합합니다.\n\n[오답 보기 해설]\n• ㉡ 경쟁이 치열한 시장에서는 초기저가격(침투가격)이 적합합니다.\n• ㉣ 동질적 시장에서는 스키밍 효과를 보기 어렵습니다."
+      },
+      {
+        id: 30,
+        category: "[경영] 경영전략",
+        question: "30. 아래는 마이클 포터(Michael E. Porter)의 산업구조분석모형(5 forces model)을 나타낸 것이다. 다음 중 공급자의 교섭력이 높은 상황을 [보기]에서 모두 고르면?",
+        boxContent: `
+          <div style="background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; max-width: 320px; margin: 0 auto 12px auto; text-align: center;">
+            <div style="font-size: 0.8rem; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 20px; padding: 6px; width: 90px; margin: 0 auto 8px auto;">대체재의 위협</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 4px 0;">
+              <div style="font-size: 0.75rem; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 20px; padding: 6px; width: 85px;">공급자의 교섭력</div>
+              <div style="font-size: 0.75rem; background: var(--primary-light); color: var(--primary); font-weight: bold; border: 1.5px solid var(--primary); border-radius: 50%; width: 65px; height: 65px; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.1;">기존 산업 내<br>경쟁</div>
+              <div style="font-size: 0.75rem; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 20px; padding: 6px; width: 85px;">구매자의 교섭력</div>
+            </div>
+            <div style="font-size: 0.8rem; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 20px; padding: 6px; width: 90px; margin: 8px auto 0 auto;">잠재적 경쟁자</div>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; font-size: 0.9ln;">
+            <div style="font-weight: bold; margin-bottom: 4px; text-align: center;">[ 보기 ]</div>
+            <div>㉠ 공급자의 수가 적은 경우</div>
+            <div>㉡ 제품의 차별화 정도가 낮은 경우</div>
+            <div>㉢ 구매자의 제품 전환 비용이 높은 경우</div>
+            <div>㉣ 구매자가 제품에 대해 많은 정보를 보유한 경우</div>
+          </div>
+        `,
+        options: ["① ㉠, ㉡", "② ㉠, ㉢", "③ ㉡, ㉢", "④ ㉡, ㉣", "⑤ ㉢, ㉣"],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② ㉠, ㉢ (정답): 공급자 수가 적을수록(㉠), 구매자의 전환 비용이 높을수록(㉢) 공급자 우위가 되어 교섭력이 높아집니다.\n\n[오답 보기 해설]\n• ㉡ 제품 차별화가 낮으면 공급자 힘이 약화됩니다.\n• ㉣ 구매자 정보가 많으면 구매자 교섭력이 높아집니다."
+      },
+      {
+        id: 31,
+        category: "[경영] 금융상품",
+        question: "31. 아래에서 설명하는 이것은?",
+        boxContent: "이것은 선물 거래 시 포지션의 손실이 커져 결국 유지증거금(계좌의 남은 잔액) 이하로 감소했을 때 추가증거금 납부가 요청되는 조치를 일컫는 말이다. 최근 비트코인 가격이 9만 달러대 지지선이 붕괴되자 기계적 강제청산이 봇물처럼 이어져 낙폭이 확대됐다.",
+        options: ["① 빅배스(Big bath)", "② 오버행(Overhang)", "③ 콜머니(Call money)", "④ 마진콜(Margin call)", "⑤ 콜드체인(Cold chain)"],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ 마진콜 (정답): 증거금 부족 시 추가 납부를 요구하거나 강제 청산하는 조치를 마진콜(Margin call)이라 합니다.\n\n[오답 보기 해설]\n• ① 빅배스: 부실을 한 회계연도에 모두 반영하는 회계 기법입니다.\n• ② 오버행: 대량의 잠재 매물 부담입니다.\n• ③ 콜머니: 금융기관 간 단기 자금 차입입니다.\n• ⑤ 콜드체인: 저온 유통 물류 시스템입니다."
+      },
+      {
+        id: 32,
+        category: "[경영] 금융상품",
+        question: "32. 아래의 빈칸 ( A )에 들어갈 가장 알맞은 용어는?",
+        boxContent: "미리미리 '셀프 노후 대비'에 나서야 한다는 인식이 확산되는 가운데 최근 ( A )가 각광받는다. ( A )는 투자자의 은퇴 시점을 목표 시점으로 설정하고 연령대별로 맞춤형 자산관리를 해주는 펀드이다. 생애 주기에 맞춰 주식, 채권 등 투자자산 비중을 알아서 조정해준다.",
+        options: ["① CMA", "② DLF", "③ MMF", "④ TDF", "⑤ TIF"],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ TDF (정답): Target Date Fund로 은퇴 시점에 맞춰 자산 배분을 자동 조정해주는 생애주기 펀드입니다.\n\n[오답 보기 해설]\n• ① CMA: 종합자산관리계좌입니다.\n• ② DLF: 파생결합펀드입니다.\n• ③ MMF: 단기 금융상품 투자 펀드입니다.\n• ⑤ TIF: 타겟 인컴 펀드로 은퇴 후 현금 흐름 창출에 초점을 둡니다."
+      },
+      {
+        id: 33,
+        category: "[경영] 창업",
+        question: "33. 아래에서 설명하는 이것은?",
+        boxContent: "이것은 뾰족한 뿔이 하나있는 밀처럼 생긴 신화 속의 동물을 일컫는다. 기업가치가 10억 달러 이상인 비상장기업을 뜻하는 용어로 자주 사용된다. 상장이 이루어지기 전에 이처럼 가치가 높은 기업은 상상 속에 존재하는 동물처럼 희귀하다는 의미이다. 이것의 숫자는 창업생태계의 성장을 보여주는 중요한 지표로 인식되고 있다.",
+        options: ["① 데카콘", "② 미니콘", "③ 유니콘", "④ 헥토콘", "⑤ 해커톤"],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 유니콘 (정답): 기업가치 1억/10억 달러 이상의 비상장 스타트업을 유니콘 기업이라 부릅니다.\n\n[오답 보기 해설]\n• ① 데카콘: 기업가치 100억 달러 이상 기업입니다.\n• ② 미니콘: 초기 스타트업입니다.\n• ④ 헥토콘: 기업가치 1,000억 달러 이상 기업입니다.\n• ⑤ 해커톤: 마라톤 하듯 집중 개발하는 행사입니다."
+      },
+      {
+        id: 34,
+        category: "[경영] 인사관리",
+        question: "34. 아래에서 설명하는 이것은?",
+        boxContent: "이것은 조직에 새로 들어온 인재가 조직에 수월하게 적응할 수 있도록 돕는 과정을 뜻한다. 최근 수시채용이 증가하면서 신규 입사자의 조직 몰입 증가, 근속기간 상승을 위해 이것에 방점을 두는 기업들이 증가했다. 카카오가 온라인으로 신규 입사자에게 기업 문화와 직무 내용을 교육하고, 동료 매칭을 지원하는 것이 이것의 사례이다.",
+        options: ["① 경력닻", "② 온보딩", "③ 경영참가", "④ 공동교섭", "⑤ 유니온 숍"],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② 온보딩 (정답): 신규 입사자가 조직과 직무에 원활히 적응할 수 있도록 지원하는 교육·적응 프로그램입니다.\n\n[오답 보기 해설]\n• ① 경력닻: 개인이 직업 선택 시 유지하려는 가치관입니다.\n• ③ 경영참가: 근로자의 경영 의사결정 참여입니다.\n• ④ 공동교섭: 노동조합들의 연합 교섭입니다.\n• ⑤ 유니온 숍: 입사 후 노조 가입을 강제하는 제도입니다."
+      },
+      {
+        id: 35,
+        category: "[경영] 경영전략",
+        question: "35. 아래에서 설명하는 이것은?",
+        boxContent: "이것은 판을 뒤흔들어 시장의 흐름을 통째로 바꾸거나 어떤 일의 결과나 흐름을 뒤집어 놓을 만한 결정적인 역할을 한 사건, 사람, 서비스, 제품을 말한다. 대표적인 사례로는 마이크로소프트의 윈도우, 애플의 아이폰, 마크 저커버그의 페이스북 등이 있다.",
+        options: ["① 프로슈머", "② 게임 체인저", "③ 얼리 어답터", "④ 퍼스트 캐리어", "⑤ 패스트 팔로어"],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② 게임 체인저 (정답): 시장의 판도를 완전히 뒤바꾸는 혁신적 주체나 제품을 뜻합니다.\n\n[오답 보기 해설]\n• ① 프로슈머: 생산에 참여하는 소비자입니다.\n• ③ 얼리 어답터: 신제품을 남보다 먼저 수용하는 소비층입니다.\n• ④ 퍼스트 캐리어: 최초 운송/통신 사업자 등을 의미합니다.\n• ⑤ 패스트 팔로어: 선발주자를 빠르게 모방 추격하는 전략입니다."
+      },
+      {
+        id: 36,
+        category: "[경영] 금융상품",
+        question: "36. 다음 중 집을 소유하고 있지만 소득이 부족한 고령자가 집을 담보로 맡기고 매월 일정 금액을 지급받는 금융상품으로 가장 올바른 것은?",
+        options: ["① 노령연금", "② 주택연금", "③ 변액보험", "④ 보금자리론", "⑤ 전세자금보증"],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② 주택연금 (정답): 주택을 담보로 노후 생활자금을 매월 연금 형태로 받는 국가 보증 상품입니다.\n\n[오답 보기 해설]\n• ① 노령연금: 국민연금 가입 기간에 따른 노후 연금입니다.\n• ③ 변액보험: 투자 실적에 따라 보험금이 변동하는 상품입니다.\n• ④ 보금자리론: 장기 고정금리 주택담보대출입니다.\n• ⑤ 전세자금보증: 전세대출 보증 상품입니다."
+      },
+      {
+        id: 37,
+        category: "[시사] 핀테크",
+        question: "37. 아래에서 설명하고 있는 이것은?",
+        boxContent: "이것은 소셜 네트워크 서비스를 이용해 소규모 후원이나 투자 등의 자금을 다수의 개인들로부터 모으는 행위를 말한다. 주로 자선활동, 이벤트 개최, 상품 개발 등을 목적으로 자금을 모집한다. 투자 방식 및 목적에 따라 지분투자, 대출, 보상, 후원 등으로 분류할 수 있다.",
+        options: ["① 엔젤펀드", "② 퀀트펀드", "③ 요즈마펀드", "④ 크라우드펀딩", "⑤ 메자닌펀드"],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ 크라우드펀딩 (정답): 대중(Crowd)으로부터 자금을 모으는 방식입니다.\n\n[오답 보기 해설]\n• ① 엔젤펀드: 초기 창업자에 투자하는 개인 투자 조합 펀드입니다.\n• ② 퀀트펀드: 계량적 모델에 기반한 투자 펀드입니다.\n• ③ 요즈마펀드: 이스라엘의 국부 벤처 펀드입니다.\n• ⑤ 메자닌펀드: 주식과 채권의 성격을 동시에 지닌 혼합형 투자 상품입니다."
+      },
+      {
+        id: 38,
+        category: "[시사] IT·보안",
+        question: "38. 아래에서 설명하는 이것은?",
+        boxContent: "이것은 비트코인과 같은 가상화폐를 전상상에서 거래할 때, 해킹의 피해를 막기 위해 개발된 보안시스템을 말한다. 거래에 참여하는 모든 사용자에게 실시간으로 거래 내역을 보내줘 거래 때마다 이를 대조함으로써 데이터 위조 여부를 판단하는 것이 이 시스템의 기본 원리이다.",
+        options: ["① 블록체인", "② 콜드체인", "③ O2O체인", "④ 크라우드체인", "⑤ 네트워크체인"],
+        answer: 1,
+        explanation: "[정답 해설]\n• ① 블록체인 (정답): 분산원장 기술을 통해 모든 참여자가 거래 내역을 공동으로 검증·기록하는 시스템입니다.\n\n[오답 보기 해설]\n• ② 콜드체인: 저온 유통망입니다.\n• ③, ④, ⑤: 가상의 오답 용어입니다."
+      },
+      {
+        id: 39,
+        category: "[경영] 노사관계",
+        question: "39. 아래에서 설명하는 이 제도는?",
+        boxContent: "이 제도는 인건비 부담을 줄이면서 숙련된 직원을 계속 고용할 수 있고 근로자는 고용을 보장받는, 기업도 좋고 근로자도 좋은 일석이조의 제도라고하지만 부작용도 있다. 퇴직금이 줄어든다는 게 대표적인 문제이다. 퇴직금은 보통 퇴직 직전 3개월간 평균 임금을 기준으로 산정하기 때문이다.",
+        options: ["① 고용보험제", "② 임금피크제", "③ 최저임금제", "④ 종신고용제", "⑤ 타임오프제"],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② 임금피크제 (정답): 일정 연령을 기준으로 임금을 감액하는 대신 정년을 보장하는 제도입니다.\n\n[오답 보기 해설]\n• ① 고용보험제: 실업 급여 및 고용 안정 지원 제도입니다.\n• ③ 최저임금제: 임금의 최저 수준을 법으로 정한 것입니다.\n• ④ 종신고용제: 평생 직장 보장 관행입니다.\n• ⑤ 타임오프제: 근로시간면제제도로 노조 활동 시간에 대한 임금 지급 기준입니다."
+      },
+      {
+        id: 40,
+        category: "[시사] IT·보안",
+        question: "40. 아래에서 설명하는 이것은?",
+        boxContent: "이것은 인터넷 사용자의 컴퓨터를 악성코드에 감염시킨 뒤 몰래 잠입해 중요 문서나 파일을 암호화하는 프로그램이다. 암호화 한 후 파일을 열 수 있는 해독용 열쇠 프로그램을 전송하는 대가로 돈을 요구하는데, 익명성이 보장되는 비트코인으로 송금하도록 해 계좌 추적이 쉽지 않아 각별한 주의가 요구된다.",
+        options: ["① 피싱", "② 파밍", "③ 스미싱", "④ 랜섬웨어", "⑤ 트로이목마"],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ 랜섬웨어 (정답): 파일을 인질(Ransom) 삼아 암호화하고 금전을 요구하는 악성 프로그램입니다.\n\n[오답 보기 해설]\n• ① 피싱: 금융기관 사칭 사기입니다.\n• ② 파밍: 가짜 사이트로 유도해 개인정보를 탈취합니다.\n• ③ 스미싱: 문자메시지 소액결제 유도 사기입니다.\n• ⑤ 트로이목마: 정상 프로그램으로 위장한 악성코드입니다."
+      },
+      {
+        id: 41,
+        category: "[경제] 거시경제",
+        question: "41. 다음 중 실업률 상승과 인플레이션이 동시에 발생하는 현상을 일컫는 용어는?",
+        options: ["① 인플레이션", "② 디플레이션", "③ 스태그플레이션", "④ 디스인플레이션", "⑤ 하이퍼인플레이션"],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 스태그플레이션 (정답): 경기 침체(Stagnation)와 물가 상승(Inflation)이 공존하는 현상입니다.\n\n[오답 보기 해설]\n• ① 인플레이션: 물가 지속 상승입니다.\n• ② 디플레이션: 물가 지속 하락입니다.\n• ④ 디스인플레이션: 물가 상승률 둔화입니다.\n• ⑤ 하이퍼인플레이션: 초고물가 폭등입니다."
+      },
+      {
+        id: 42,
+        category: "[경제] 미시경제",
+        question: "42. 아래 설명과 가장 관련 깊은 개념은?",
+        boxContent: "한 식품회사가 초코파이를 소규모로 제조할 때는 제품 하나당 생산비가 높았으나 자동화 설비 도입과 대량생산 체제를 갖추면서 생산비가 크게 줄었다. 이로 인해 회사는 더 저렴하게 초코파이를 판매할 수 있게 되었고, 이는 매출 증가로 이어졌다.",
+        options: ["① 규모의 경제", "② 범위의 경제", "③ 속도의 경제", "④ 시스템의 경제", "⑤ 네트워크 경제"],
+        answer: 1,
+        explanation: "[정답 해설]\n• ① 규모의 경제 (정답): 생산 규모가 커질수록 평균 비용이 하락하는 경제적 현상입니다.\n\n[오답 보기 해설]\n• ② 범위의 경제: 여러 제품을 함께 생산할 때 비용이 절감되는 효과입니다.\n• ③ 속도의 경제: 신속한 처리로 비용을 줄이는 것입니다.\n• ④, ⑤ 기타 경제 개념입니다."
+      },
+      {
+        id: 43,
+        category: "[경제] 소비이론",
+        question: "43. 아래에서 설명하는 경제학 개념은?",
+        boxContent: "한번 올라간 소비수준은 추후 가처분소득이 감소하더라도 쉽게 줄지 않는다. 소비는 가처분소득은 물론 또래 집단의 소비수준 및 자신의 과거 소비 등에 의해서도 영향을 받기 때문이다. 유기농 식단만 고집하던 사람이 가처분소득이 줄더라도 한동안 과거의 소비수준을 유지하고자 하는 것이 그 사례이다.",
+        options: ["① 소득효과", "② 대체효과", "③ 피구효과", "④ 피셔효과", "⑤ 톱니효과"],
+        answer: 5,
+        explanation: "[정답 해설]\n• ⑤ 톱니효과 (정답): 소비의 하향 경직성으로 소득이 줄어도 과거 최고 소비 수준을 유지하려는 성향입니다.\n\n[오답 보기 해설]\n• ① 소득효과: 실질 소득 변화에 따른 소비 변화입니다.\n• ② 대체효과: 상대 가격 변화에 따른 대체 소비입니다.\n• ③ 피구효과: 자산 실질가치 변화에 따른 소비 변동입니다.\n• ④ 피셔효과: 명목금리와 실질금리, 인플레이션의 관계입니다."
+      },
+      {
+        id: 44,
+        category: "[경제] 시장구조",
+        question: "44. 다음 중 독점적 경쟁시장에 대한 가장 올바른 설명은?",
+        options: [
+          "① 가격수용자로 행동한다.",
+          "② 법적·제도적 진입장벽이 존재한다.",
+          "③ 다수의 기업과 소수의 수요자가 존재한다.",
+          "④ 기업은 장기적으로 초과이윤을 누릴 수 없다.",
+          "⑤ 국내 이동통신시장은 독점적 경쟁시장에 해당한다."
+        ],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ 기업은 장기적으로 초과이윤을 누릴 수 없다 (정답): 진입과 퇴출이 자유로우므로 장기에는 정상이윤만 남게 됩니다.\n\n[오답 보기 해설]\n• ① 가격설정자로 행동합니다.\n• ② 진입장벽이 낮습니다.\n• ③ 다수의 기업과 다수의 수요자가 존재합니다.\n• ⑤ 이동통신은 과점 시장에 해당합니다."
+      },
+      {
+        id: 45,
+        category: "[경제] 수요공급",
+        question: "45. 다음 중 커피의 시장가격을 상승시키는 요인은? (단, 커피는 정상재이며, 홍차와는 대체재 그리고 베이글과는 보완재 관계이다.)",
+        options: [
+          "① 커피 원두 가격 하락",
+          "② 해외 산 홍차 수입 확대",
+          "③ 홍차 생산자에 대한 과세",
+          "④ 소비자의 베이글에 대한 선호도 감소",
+          "⑤ 경기불황으로 인한 처분가능소득 감소"
+        ],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 홍차 생산자에 대한 과세 (정답): 대체재인 홍차 가격이 상승하므로 커피 수요가 늘어 커피 가격이 상승합니다.\n\n[오답 보기 해설]\n• ① 원두 가격 하락은 공급 증가로 커피 가격을 하락시킵니다.\n• ② 홍차 수입 확대는 홍차 가격 하락을 유발해 커피 수요를 줄입니다.\n• ④ 베이글(보완재) 선호 감소는 커피 수요를 줄입니다.\n• ⑤ 소득 감소(정상재)는 커피 수요를 줄입니다."
+      },
+      {
+        id: 46,
+        category: "[경제] 환율",
+        question: "46. 다음 중 외환시장에서 달러당 원화의 환율(원/달러)을 하락시키는 요인은? (단, 다른 조건은 일정하다.)",
+        options: [
+          "① 미국 정책금리 인상",
+          "② 미국 국채 수요 증가",
+          "③ 대미 경상수지 적자액 누적",
+          "④ 외국인의 국내 주식매입 증가",
+          "⑤ 우리나라 지정학적 리스크 증가"
+        ],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ 외국인의 국내 주식매입 증가 (정답): 외국인이 달러를 가져와 원화로 바꾸므로 외환시장에 달러 공급이 늘어나 원/달러 환율이 하락(원화 가치 상승)합니다.\n\n[오답 보기 해설]\n• ①, ②, ③, ⑤는 모두 달러 수요를 늘리거나 원화 가치를 하락(환율 상승)시키는 요인입니다."
+      },
+      {
+        id: 47,
+        category: "[경제] 시장실패",
+        question: "47. 시장이 제 기능을 발휘하지 못해 자원의 비효율적 배분이 발생하는 것을 시장실패라고 한다. 다음 중 시장실패의 원인이 아닌 것은?",
+        options: ["① 소비의 외부성", "② 소비의 경합성", "③ 정보의 비대칭성", "④ 기업 간 불완전 경쟁", "⑤ 공공재 공급 시 무임승차"],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② 소비의 경합성 (정답): 경합성은 일반적인 사유재의 정상적 특징으로 시장실패의 원인이 아닙니다.\n\n[오답 보기 해설]\n• ① 외부성, ③ 정보의 비대칭성, ④ 불완전경쟁, ⑤ 공공재(비경합성·비배제성)는 모두 시장실패의 대표적 원인입니다."
+      },
+      {
+        id: 48,
+        category: "[경제] 노동경제",
+        question: "48. 다음 중 실망노동자(discouraged worker)에 대해 올바르지 않은 설명은?",
+        options: [
+          "① 생산가능인구에 포함된다.",
+          "② 비경제활동인구에 포함된다.",
+          "③ 실망노동자가 증가하면 실업률은 상승한다.",
+          "④ 무급으로 가족 사업을 도와주는 사람은 실망노동자에 해당하지 않는다.",
+          "⑤ 구직활동을 그만두고 최근 3개월 간 그냥 쉰 취업준비생은 실망노동자에 해당한다."
+        ],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 실망노동자가 증가하면 실업률은 상승한다 (정답-올바르지 않은 것): 실망노동자가 늘어나면 구직을 포기하여 경제활동인구에서 빠지므로 공식 실업률은 오히려 하락합니다.\n\n[오답 보기 해설]\n• ①, ②, ④, ⑤는 실망노동자의 인구학적 분류 및 정의에 대한 올바른 설명입니다."
+      },
+      {
+        id: 49,
+        category: "[경제] 국민소득",
+        question: "49. 다음 [보기] 중 국민경제에서 총수요의 구성항목으로 올바르게 짝지은 것은?",
+        boxContent: "[ 보기 ]<br>㉠ 투자<br>㉡ 준비자산<br>㉢ 순수출<br>㉣ 자본이전",
+        options: ["① ㉠, ㉡", "② ㉠, ㉢", "③ ㉡, ㉢", "④ ㉡, ㉣", "⑤ ㉢, ㉣"],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② ㉠, ㉢ (정답): 총수요(AD)는 소비(C), 투자(I, ㉠), 정부지출(G), 순수출(NX, ㉢)로 구성됩니다.\n\n[오답 보기 해설]\n• ㉡ 준비자산과 ㉣ 자본이전은 국제수지나 자본계정 항목으로 총수요 구성항목이 아닙니다."
+      },
+      {
+        id: 50,
+        category: "[경제] 미시경제",
+        question: "50. 다음 중 합리적 선택을 내리는 과정에서 고려해서는 안 되는 비용은?",
+        options: ["① 기회비용", "② 매몰비용", "③ 거래비용", "④ 메뉴비용", "⑤ 그림자비용"],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② 매몰비용 (정답): 이미 지불되어 회수할 수 없는 매몰비용은 합리적 의사결정 시 철저히 배제해야 합니다.\n\n[오답 보기 해설]\n• ① 기회비용, ③ 거래비용, ④ 메뉴비용, ⑤ 그림자비용은 의사결정 시 고려해야 할 경제적 비용들입니다."
+      },
+      {
+        id: 51,
+        category: "[경제] 소비심리",
+        question: "51. 다음 중 ‘어떤 상품이 대중에게 널리 사용될수록 그 상품에 대해 덜 수요하게 소비심리’를 의미하는 것은?",
+        options: ["① 스놉효과", "② 메기효과", "③ 디드로효과", "④ 파노플리효과", "⑤ 밴드왜건효과"],
+        answer: 1,
+        explanation: "[정답 해설]\n• ① 스놉효과 (정답): 남들과는 다른 차별화를 추구하며 대중화되면 수요를 줄이는 속물효과입니다.\n\n[오답 보기 해설]\n• ② 메기효과: 강력한 경쟁자의 존재가 시장에 활력을 주는 효과입니다.\n• ③ 디드로효과: 특정 물건 구매 후 어울리는 다른 제품을 연쇄 구매하는 현상입니다.\n• ④ 파노플리효과: 특정 집단 동조를 위한 소비입니다.\n• ⑤ 밴드왜건효과: 유행을 좇아 남들이 사니까 사는 편승효과입니다."
+      },
+      {
+        id: 52,
+        category: "[경제] 생산이론",
+        question: "52. 나머지 생산요소의 투입량은 유지한 채 한 가지 생산요소의 투입량이 증가할수록 한 단위 투입으로 인한 생산량의 증분이 점점 감소하는 현상은?",
+        options: ["① 신경제", "② 레퍼곡선", "③ 빈곤의 함정", "④ 규모의 경제", "⑤ 한계생산성체감"],
+        answer: 5,
+        explanation: "[정답 해설]\n• ⑤ 한계생산성체감 (정답): 한계생산 체감의 법칙에 대한 설명입니다.\n\n[오답 보기 해설]\n• ① 신경제: IT 기반 고성장 경제 체제입니다.\n• ② 레퍼곡선: 세율과 세수의 관계를 나타낸 곡선입니다.\n• ③ 빈곤의 함정: 저개발국가의 빈곤 악순환입니다.\n• ④ 규모의 경제: 생산 규모 확대에 따른 비용 절감입니다."
+      },
+      {
+        id: 53,
+        category: "[경제] 수요법칙",
+        question: "53. 다음 중 재화의 가격이 상승함에도 수요가 증가하는 현상을 모두 고르면?",
+        boxContent: "[ 보기 ]<br>㉠ 무상재<br>㉡ 기펜재<br>㉢ 사유재<br>㉣ 베블런재",
+        options: ["① ㉠, ㉡", "② ㉠, ㉢", "③ ㉡, ㉢", "④ ㉡, ㉣", "⑤ ㉢, ㉣"],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ ㉡, ㉣ (정답): 수요 법칙의 예외로 가격이 올라도 수요가 늘어나는 재화는 열등재 중 소득효과가 큰 기펜재(㉡)와 과시욕 소비인 베블런재(㉣)입니다.\n\n[오답 보기 해설]\n• ㉠ 무상재와 ㉢ 사유재는 수요 법칙의 예외 재화가 아닙니다."
+      },
+      {
+        id: 54,
+        category: "[경제] 인플레이션",
+        question: "54. 다음 중 물가상승이 근로자의 임금인상 요구로 이어지고 기업이 증가한 인건비 부담을 제품가격에 전가해 다시 물가가 상승하는 과정을 의미하는 경제개념은?",
+        options: ["① 멜서스의 함정", "② 죄수의 딜레마", "③ 디플레이션 악순환", "④ 다이아몬드의 역설", "⑤ 임금-물가 악순환"],
+        answer: 5,
+        explanation: "[정답 해설]\n• ⑤ 임금-물가 악순환 (정답): 임금 인상과 물가 상승이 상호 작용하여 악순환을 이루는 현상입니다.\n\n[오답 보기 해설]\n• ① 멜서스의 함정: 인구 증가가 식량 생산을 앞지르는 현상입니다.\n• ② 죄수의 딜레마: 게임이론의 비협력적 균형입니다.\n• ③ 디플레이션 악순환: 물가 하락의 경기 침체 연쇄입니다.\n• ④ 다이아몬드 역설: 실용성에 비해 비싼 가치 모순입니다."
+      },
+      {
+        id: 55,
+        category: "[경제] 요소시장",
+        question: "55. 다음 중 생산요소가 거래되는 시장 중 하나로, 균형 임금이 결정되는 시장은?",
+        options: ["① 화폐시장", "② 노동시장", "③ 채권시장", "④ 대부자금시장", "⑤ 재화 및 서비스 시장"],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② 노동시장 (정답): 노동이라는 생산요소가 거래되며 임금이 결정되는 시장입니다.\n\n[오답 보기 해설]\n• ① 화폐시장: 단기 자금 거래 시장입니다.\n• ③ 채권시장: 채권 매매 시장입니다.\n• ④ 대부자금시장: 저축과 투자가 이루어지는 자금 시장입니다.\n• ⑤ 재화 및 서비스 시장: 최종 생산물이 거래되는 생산물 시장입니다."
+      },
+      {
+        id: 56,
+        category: "[경제] 투자이론",
+        question: "56. 다음 중 기업이 투자를 촉진하게 하는 요인만을 [보기]에서 모두 고르면?",
+        boxContent: "[ 보기 ]<br>㉠ 대출금리 인하<br>㉡ 단기금리 역전<br>㉢ 소비자심리지수 상승<br>㉣ 기업의 매출 변동성 증대",
+        options: ["① ㉠, ㉡", "② ㉠, ㉢", "③ ㉡, ㉢", "④ ㉡, ㉣", "⑤ ㉢, ㉣"],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② ㉠, ㉢ (정답): 대출금리 인하(자금조달 비용 감소)와 소비자심리지수 상승(수요 증가 예상)은 기업의 투자를 적극 촉진합니다.\n\n[오답 보기 해설]\n• ㉡ 금리 역전과 ㉣ 매출 변동성 증대는 경제 불확실성을 높여 투자를 위축시킵니다."
+      },
+      {
+        id: 57,
+        category: "[경제] 가격차별",
+        question: "57. 다음 중 아래에 설명된 가격차별의 사례에 해당하지 않는 것은?",
+        boxContent: "영국의 신고전파 경제학자 피구(Arthur Cecil Pigou)는 가격차별을 세 가지로 구분했다. 첫째, 기업이 개별 소비자들의 지불의사격을 정확히 알고 있어 지불의사가격으로 가격을 책정하는 경우, 둘째, 구매 수량에 따라 다른 가격을 부과하는 경우, 셋째, 소비자들의 수요의 가격탄력성에 따라 서로 다른 그룹으로 구분하여 역락력성 규칙에 따라 서로 다른 가격을 부과하는 경우것이다.",
+        options: [
+          "① 노령층을 대상으로 한 저렴한 휴대폰 요금제",
+          "② 기존 버스보다 훨씬 고가의 프리미엄 버스노선 개통",
+          "③ 월 단위 사용량에 따라 다른 요율을 적용받는 모바일 데이터 요금제",
+          "④ 놀이공원에서 입장료와 놀이기구 이용료를 구분해 청구하는 가격정책",
+          "⑤ 비수기와 성수기에 따라 서로 다른 가격대를 적용되는 펜션 및 리조트의 요금정책"
+        ],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② 기존 버스보다 훨씬 고가의 프리미엄 버스노선 개통 (정답-해당 없는 것): 프리미엄 버스는 차별화된 별개 서비스 상품을 공급하는 것이므로 단순 가격차별이 아닙니다.\n\n[오답 보기 해설]\n• ①, ③, ④, ⑤는 모두 소비자 집단별, 수량별, 시점별 가격차별의 전형적인 사례입니다."
+      },
+      {
+        id: 58,
+        category: "[경제] 분배지표",
+        question: "58. 다음 중 지니계수 값이 낮아질 것으로 예상되는 정부정책만을 [보기]에서 모두 고르면?",
+        boxContent: "[ 보기 ]<br>㉠ 조세수입에서 물품세 비중을 높였다.<br>㉡ 노령연금 및 실업급여 지급 대상을 확대했다.<br>㉢ 근로유인 제공을 위해 근로장려세제를 확대시행 했다.<br>㉣ 민간소비 촉진을 위해 소득세 누진율을 낮추는 소득세계 개편을 단행했다.",
+        options: ["① ㉠, ㉡", "② ㉠, ㉢", "③ ㉡, ㉢", "④ ㉡, ㉣", "⑤ ㉢, ㉣"],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ ㉡, ㉢ (정답): 이전지출 확대(㉡)와 근로장려세제(EITC) 확대(㉢)는 저소득층의 실질 소득을 높여 소득 불평등을 완화(지니계수 하락)시킵니다.\n\n[오답 보기 해설]\n• ㉠ 물품세(간접세) 비중 확대는 역진성으로 불평등을 악화시킬 수 있습니다.\n• ㉣ 소득세 누진율 완화는 고소득층에 유리해 불평등을 심화시킵니다."
+      },
+      {
+        id: 59,
+        category: "[경제] 조세제도",
+        question: "59. 아래 <표>는 두 조세제도 (가), (나)를 비교한 것이다. 다음 중 이에 대한 가장 올바른 설명은?",
+        boxContent: `
+          <div style="text-align: center; font-weight: bold; margin-bottom: 6px; font-size: 0.95rem;">〈표〉 조세제도 비교</div>
+          <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 0.9rem; background: #fff;">
+            <tr style="background: #f1f5f9; border-bottom: 1px solid var(--border-color);">
+              <th style="padding: 8px; border-right: 1px solid var(--border-color); width: 20%;">구분</th>
+              <th style="padding: 8px; border-right: 1px solid var(--border-color); width: 40%;">(가)</th>
+              <th style="padding: 8px; width: 40%;">(나)</th>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border-color);">
+              <td style="padding: 8px; background: #f8fafc; border-right: 1px solid var(--border-color); font-weight: bold;">특징</td>
+              <td style="padding: 8px; border-right: 1px solid var(--border-color);">납세자와 담세자가 일치</td>
+              <td style="padding: 8px;">납세자와 담세자가 불일치</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; background: #f8fafc; border-right: 1px solid var(--border-color); font-weight: bold;">예</td>
+              <td style="padding: 8px; border-right: 1px solid var(--border-color);">소득세, 법인세</td>
+              <td style="padding: 8px;">부가가치세, 주세</td>
+            </tr>
+          </table>
+        `,
+        options: [
+          "① (가)는 대체로 비례세가 적용된다.",
+          "② (가)에 비해 (나)에서 조세저항이 더 강하다.",
+          "③ (나)는 (가)에 비해 조세전가가 더 용이하다.",
+          "④ (가)는 (나)보다 조세행정비용이 적게 소요된다.",
+          "⑤ (나)는 (가)보다 소득재분배 효과가 더 크게 나타난다."
+        ],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ (나)는 (가)에 비해 조세전가가 더 용이하다 (정답): (나)는 간접세이므로 가격 전가를 통해 타인에게 세금 부담을 전가하기 용이합니다.\n\n[오답 보기 해설]\n• ① (가) 직접세는 주로 누진세가 적용됩니다.\n• ② 직접세인 (가)에서 조세저항이 더 큽니다.\n• ④ 간접세는 징수 비용이 더 많이 소요될 수 있습니다.\n• ⑤ 소득재분배 효과는 직접세인 (가)가 더 큽니다."
+      },
+      {
+        id: 60,
+        category: "[경제] 거시정책",
+        question: "60. A국의 경제성장률이 아래 [그림]과 같다고 할 때, 향후 A국 정부가 시행할 것으로 예상되는 경제 정책과 가장 거리가 먼 것은?",
+        boxContent: `
+          <div style="background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; max-width: 380px; margin: 0 auto; text-align: center;">
+            <div style="font-size: 0.8rem; color: #475569; text-align: left; margin-bottom: 4px;">(%)</div>
+            <div style="position: relative; height: 150px; border-left: 2px solid #000; border-bottom: 2px solid #000; margin: 5px 0 5px 30px;">
+              <div style="position: absolute; left: -30px; top: 0; font-size: 0.75rem;">9.5</div>
+              <div style="position: absolute; left: -30px; top: 25%; font-size: 0.75rem;">9.0</div>
+              <div style="position: absolute; left: -30px; top: 50%; font-size: 0.75rem;">8.5</div>
+              <div style="position: absolute; left: -30px; top: 75%; font-size: 0.75rem;">8.0</div>
+              <div style="position: absolute; left: -30px; bottom: -5px; font-size: 0.75rem;">7.5</div>
+              
+              <!-- Graph Line & Points -->
+              <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: visible;" viewBox="0 0 300 150">
+                <polyline fill="none" stroke="#000" stroke-width="2" points="20,15 95,95 170,95 245,115 295,135" />
+                <circle cx="20" cy="15" r="4" fill="#fff" stroke="#000" stroke-width="2" />
+                <circle cx="95" cy="95" r="4" fill="#fff" stroke="#000" stroke-width="2" />
+                <circle cx="170" cy="95" r="4" fill="#fff" stroke="#000" stroke-width="2" />
+                <circle cx="245" cy="115" r="4" fill="#fff" stroke="#000" stroke-width="2" />
+                <circle cx="295" cy="135" r="4" fill="#fff" stroke="#000" stroke-width="2" />
+              </svg>
+              
+              <div style="position: absolute; left: 15px; top: -5px; font-size: 0.8rem; font-weight: bold;">9.3</div>
+              <div style="position: absolute; left: 85px; top: 72px; font-size: 0.8rem; font-weight: bold;">7.7</div>
+              <div style="position: absolute; left: 160px; top: 72px; font-size: 0.8rem; font-weight: bold;">7.7</div>
+              <div style="position: absolute; left: 235px; top: 92px; font-size: 0.8rem; font-weight: bold;">7.4</div>
+              <div style="position: absolute; left: 285px; top: 112px; font-size: 0.8rem; font-weight: bold;">7.0</div>
+            </div>
+            <div style="display: flex; justify-content: space-around; padding-left: 30px; font-size: 0.75rem; color: #000; font-weight: 600;">
+              <span>2011년</span><span>2012년</span><span>2013년</span><span>2014년</span><span>2015년</span>
+            </div>
+          </div>
+        `,
+        options: [
+          "① 기준금리 인하",
+          "② 소득세율 인하",
+          "③ SOC투자 증대",
+          "④ 지급준비율 인하",
+          "⑤ 국공채 매각 확대"
+        ],
+        answer: 5,
+        explanation: "[정답 해설]\n• ⑤ 국공채 매각 확대 (정답-거리가 먼 것): 국공채 매각은 시중 통화량을 흡수하는 긴축 정책이므로 경기 둔화 대응책과 거리가 멉니다.\n\n[오답 보기 해설]\n• ①, ②, ③, ④는 모두 경기 부양(완화적 재정·통화 정책)을 위한 수단입니다."
+      },
+      {
+        id: 61,
+        category: "[경제] 물가상승",
+        question: "61. 다음 중 물가상승을 유발하는 요인을 [보기]에서 모두 고르면?",
+        boxContent: "[ 보기 ]<br>㉠ 통화량 증가<br>㉡ 가계소비 감소<br>㉢ 신규 유전 개발<br>㉣ 원·달러 환율 상승",
+        options: ["① ㉠, ㉡", "② ㉠, ㉣", "③ ㉡, ㉢", "④ ㉡, ㉣", "⑤ ㉢, ㉣"],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② ㉠, ㉣ (정답): 통화량 증가(화폐가치 하락)와 원·달러 환율 상승(수입물가 상승)은 대표적인 물가 상승 요인입니다.\n\n[오답 보기 해설]\n• ㉡ 가계소비 감소는 총수요를 위축시켜 물가를 하락시킵니다.\n• ㉢ 신규 유전 개발은 공급 확대로 물가를 하락시킵니다."
+      },
+      {
+        id: 62,
+        category: "[경제] 탄력성",
+        question: "62. 아래 <표>는 음료수 자판기에서 판매 중인 음료 가격을 기존보다 인상한 후 판매수입 변화를 나타낸 것이다. 다음 중 각 음료 수요의 가격탄력성을 올바르게 짝지은 것은? (단, 수요의 가격탄력성은 절대값으로 나타낸다.)",
+        boxContent: `
+          <div style="text-align: center; font-weight: bold; margin-bottom: 6px; font-size: 0.95rem;">〈표〉 음료별 판매 수입 변화율</div>
+          <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 0.9rem; background: #fff;">
+            <tr style="background: #f1f5f9; border-bottom: 1px solid var(--border-color);">
+              <th style="padding: 8px; border-right: 1px solid var(--border-color); width: 28%;">구분</th>
+              <th style="padding: 8px; border-right: 1px solid var(--border-color); width: 24%;">환타</th>
+              <th style="padding: 8px; border-right: 1px solid var(--border-color); width: 24%;">사이다</th>
+              <th style="padding: 8px; width: 24%;">콜라</th>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border-color);">
+              <td style="padding: 8px; background: #f8fafc; border-right: 1px solid var(--border-color); font-weight: bold;">판매 수입 변화율</td>
+              <td style="padding: 8px; border-right: 1px solid var(--border-color);">-2%</td>
+              <td style="padding: 8px; border-right: 1px solid var(--border-color);">-5%</td>
+              <td style="padding: 8px;">0%</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; background: #f8fafc; border-right: 1px solid var(--border-color); font-weight: bold;">가격 변화율</td>
+              <td style="padding: 8px; border-right: 1px solid var(--border-color);">-4%</td>
+              <td style="padding: 8px; border-right: 1px solid var(--border-color);">5%</td>
+              <td style="padding: 8px;">10%</td>
+            </tr>
+          </table>
+        `,
+        options: [
+          "① 환타: 탄력적<br>&nbsp;&nbsp;&nbsp;&nbsp;사이다: 비탄력적<br>&nbsp;&nbsp;&nbsp;&nbsp;콜라: 단위탄력적",
+          "② 환타: 탄력적<br>&nbsp;&nbsp;&nbsp;&nbsp;사이다: 단위탄력적<br>&nbsp;&nbsp;&nbsp;&nbsp;콜라: 비탄력적",
+          "③ 환타: 비탄력적<br>&nbsp;&nbsp;&nbsp;&nbsp;사이다: 단위탄력적<br>&nbsp;&nbsp;&nbsp;&nbsp;콜라: 비탄력적",
+          "④ 환타: 비탄력적<br>&nbsp;&nbsp;&nbsp;&nbsp;사이다: 탄력적<br>&nbsp;&nbsp;&nbsp;&nbsp;콜라: 단위탄력적",
+          "⑤ 환타: 비탄력적<br>&nbsp;&nbsp;&nbsp;&nbsp;사이다: 탄력적<br>&nbsp;&nbsp;&nbsp;&nbsp;콜라: 비탄력적"
+        ],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ 환타: 비탄력적 / 사이다: 탄력적 / 콜라: 단위탄력적 (정답): 환타(탄력성 < 1), 사이다(탄력성 > 1), 콜라(탄력성 = 1)입니다.\n\n[오답 보기 해설]\n• ①, ②, ③, ⑤: 탄력성 계산 및 수입 변화 법칙(가격 상승 시 수입 감소는 탄력적) 적용 오류입니다."
+      },
+      {
+        id: 63,
+        category: "[경제] 환율",
+        question: "63. 아래는 우리나라와 미국의 빅맥가격 및 환율을 나타낸 것이다. 다음 중 가장 올바른 해석은?",
+        boxContent: `
+          <div style="max-width: 320px; margin: 0 auto; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 0.9rem; background: #fff;">
+              <tr style="background: #f1f5f9; border-bottom: 1px solid var(--border-color);">
+                <th style="padding: 8px; border-right: 1px solid var(--border-color); width: 30%;">국가</th>
+                <th style="padding: 8px; border-right: 1px solid var(--border-color); width: 35%;">미국</th>
+                <th style="padding: 8px; width: 35%;">한국</th>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 8px; background: #f8fafc; border-right: 1px solid var(--border-color); font-weight: bold;">시장환율</td>
+                <td colspan="2" style="padding: 8px; font-weight: 600;">1달러 : 1,450원</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; background: #f8fafc; border-right: 1px solid var(--border-color); font-weight: bold;">빅맥가격</td>
+                <td style="padding: 8px; border-right: 1px solid var(--border-color);">5.5달러</td>
+                <td style="padding: 8px;">5,500원</td>
+              </tr>
+            </table>
+          </div>
+        `,
+        options: [
+          "① 구매력 평가 환율은 1,100원/달러이다.",
+          "② 구매력평가가 성립한다면 시장환율 수준은 장기적으로 상승 압력을 받을 것이다.",
+          "③ 구매력 평가 환율로 볼 때 현재 외환시장에서 원화가 달러보다 저평가되어 있다.",
+          "④ 미국에서 빅맥을 구매해 비용 없이 한국에서 판매할 수 있다면 차익을 얻을 수 있다.",
+          "⑤ 현재 시장환율은 한미 양국 간의 교역 장애 요인이 존재하지 않음을 뜻한다."
+        ],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 구매력 평가 환율로 볼 때 현재 외환시장에서 원화가 달러보다 저평가되어 있다 (정답): PPP 환율(1,000원/$) 대비 실제 시장환율(1,450원)이 높으므로 원화가 저평가되었습니다.\n\n[오답 보기 해설]\n• ① PPP 환율은 5,500원 / 5.5달러 = 1,000원/$ 입니다.\n• ② 장기적으로 시장환율은 하락 압력을 받습니다.\n• ④ 운송비 및 관세 등 거래 비용이 존재합니다.\n• ⑤ 교역 장애 요인이 없음을 보장하지 않습니다."
+      },
+      {
+        id: 64,
+        category: "[경제] 재정정책",
+        question: "64. 아래는 재정정책의 파급경로를 나타낸 것이다. 다음 중 가장 올바른 설명은?",
+        boxContent: `
+          <div style="text-align: center; max-width: 440px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); position: relative; font-family: sans-serif;">
+            <svg viewBox="0 0 400 160" style="width: 100%; height: auto; overflow: visible;">
+              <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#3b82f6" />
+                </marker>
+              </defs>
+
+              <!-- A 효과 연쇄 곡선 화살표 -->
+              <path d="M 235 40 L 235 20 L 165 20 L 165 33" fill="none" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow)" />
+              <!-- A 심볼 -->
+              <circle cx="200" cy="20" r="10" fill="#3b82f6" />
+              <text x="200" y="24" font-size="11" font-weight="bold" fill="#fff" text-anchor="middle">A</text>
+
+              <!-- B 영역 점선 박스 및 B 심볼 -->
+              <rect x="110" y="80" x="115" y="80" width="170" height="50" rx="10" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4 3" />
+              <circle cx="200" cy="138" r="9" fill="#e2e8f0" stroke="#64748b" stroke-width="1" />
+              <text x="200" y="142" font-size="10" font-weight="bold" fill="#334155" text-anchor="middle">B</text>
+
+              <!-- 상단 박스들 -->
+              <!-- 정부구매 증가 -->
+              <rect x="10" y="40" width="75" height="40" rx="8" fill="#fff" stroke="#334155" stroke-width="1.5" />
+              <text x="47.5" y="58" font-size="11" font-weight="bold" text-anchor="middle" fill="#1e293b">정부구매</text>
+              <text x="47.5" y="72" font-size="11" font-weight="bold" text-anchor="middle" fill="#1e293b">증가</text>
+
+              <!-- 가처분 소득 증가 -->
+              <rect x="125" y="40" width="75" height="40" rx="8" fill="#fff" stroke="#334155" stroke-width="1.5" />
+              <text x="162.5" y="52" font-size="10" font-weight="bold" text-anchor="middle" fill="#1e293b">가처분</text>
+              <text x="162.5" y="64" font-size="10" font-weight="bold" text-anchor="middle" fill="#1e293b">소득</text>
+              <text x="162.5" y="75" font-size="10" font-weight="bold" text-anchor="middle" fill="#1e293b">증가</text>
+
+              <!-- 소비 증가 -->
+              <rect x="240" y="40" width="60" height="40" rx="8" fill="#fff" stroke="#334155" stroke-width="1.5" />
+              <text x="270" y="58" font-size="11" font-weight="bold" text-anchor="middle" fill="#1e293b">소비</text>
+              <text x="270" y="72" font-size="11" font-weight="bold" text-anchor="middle" fill="#1e293b">증가</text>
+
+              <!-- 총수요 변화 -->
+              <rect x="330" y="40" width="60" height="40" rx="8" fill="#fff" stroke="#334155" stroke-width="1.5" />
+              <text x="360" y="58" font-size="11" font-weight="bold" text-anchor="middle" fill="#1e293b">총수요</text>
+              <text x="360" y="72" font-size="11" font-weight="bold" text-anchor="middle" fill="#1e293b">변화</text>
+
+              <!-- 하단 박스들 (B 효과 내부) -->
+              <!-- 이자율 상승 -->
+              <rect x="130" y="85" width="65" height="38" rx="8" fill="#fff" stroke="#334155" stroke-width="1.5" />
+              <text x="162.5" y="101" font-size="10.5" font-weight="bold" text-anchor="middle" fill="#1e293b">이자율</text>
+              <text x="162.5" y="115" font-size="10.5" font-weight="bold" text-anchor="middle" fill="#1e293b">상승</text>
+
+              <!-- 투자 감소 -->
+              <rect x="220" y="85" width="55" height="38" rx="8" fill="#fff" stroke="#334155" stroke-width="1.5" />
+              <text x="247.5" y="101" font-size="10.5" font-weight="bold" text-anchor="middle" fill="#1e293b">투자</text>
+              <text x="247.5" y="115" font-size="10.5" font-weight="bold" text-anchor="middle" fill="#1e293b">감소</text>
+
+              <!-- 화살표 연결선들 -->
+              <!-- 정부구매 증가 -> 가처분소득 증가 -->
+              <line x1="85" y1="60" x2="119" y2="60" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow)" />
+
+              <!-- 가처분소득 증가 -> 소비 증가 -->
+              <line x1="200" y1="60" x2="234" y2="60" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow)" />
+
+              <!-- 소비 증가 -> 총수요 변화 -->
+              <line x1="300" y1="60" x2="324" y2="60" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow)" />
+
+              <!-- 정부구매 증가 -> 이자율 상승 (하단 꺾임 경로) -->
+              <path d="M 47.5 80 L 47.5 104 L 124 104" fill="none" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow)" />
+
+              <!-- 이자율 상승 -> 투자 감소 -->
+              <line x1="195" y1="104" x2="214" y2="104" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow)" />
+
+              <!-- 투자 감소 -> 총수요 변화 (우측 꺾임 경로) -->
+              <path d="M 275 104 L 360 104 L 360 86" fill="none" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow)" />
+            </svg>
+          </div>
+        `,
+        options: [
+          "① A 효과는 가계의 한계소비성향이 작을수록 강해진다.",
+          "② A 효과가 클수록 정부는 적은 재정부담으로도 큰 경기안정화효과를 얻을 수 있다.",
+          "③ B 효과가 클수록 재정정책의 경기안정화효과가 강해진다.",
+          "④ B 효과는 기업의 투자가 이자율에 민감하게 영향 받을수록 약해진다.",
+          "⑤ B 효과는 총수요에서 민간부문의 비중을 증가시킨다."
+        ],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② A 효과가 클수록 정부는 적은 재정부담으로도 큰 경기안정화효과를 얻을 수 있다 (정답): A는 승수효과를 의미하며, 승수효과가 클수록 작은 지출 확대로도 큰 국민소득 증대 효과를 얻습니다.\n\n[오답 보기 해설]\n• ① 한계소비성향이 클수록 승수효과가 강해집니다.\n• ③ B(구축효과)가 클수록 재정정책의 효과는 약화됩니다.\n• ④ 투자가 이자율에 민감할수록 구축효과(B)가 커집니다.\n• ⑤ 구축효과는 민간 투자를 위축시킵니다."
+      },
+      {
+        id: 65,
+        category: "[경제] 노동통계",
+        question: "65. 아래는 A국의 주요 노동시장 통계를 나타낸 것이다. 다음 중 A국의 실업률로 올바른 것은?",
+        boxContent: "전체인구: 1000만 명<br>생산가능인구: 700만 명<br>취업자: 460만 명<br>비경제활동인구: 200만 명",
+        options: ["① 4%", "② 5%", "③ 8%", "④ 10%", "⑤ 15%"],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 8% (정답): 경제활동인구 = 생산가능인구(700) - 비경제활동인구(200) = 500만명. 실업자 = 경제활동인구(500) - 취업자(460) = 40만명. 실업률 = 40/500 = 8%입니다.\n\n[오답 보기 해설]\n• ①, ②, ④, ⑤: 계산 공식 적용 오류로 도출된 오답입니다."
+      },
+      {
+        id: 66,
+        category: "[경제] 거시경제",
+        question: "66. 아래의 두 사건이 동시에 발생할 때 A국의 거시경제 균형 e가 이동할 방향으로 가장 올바른 것은?",
+        boxContent: `
+          <div style="background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; max-width: 360px; margin: 0 auto; text-align: left;">
+            <div style="margin-bottom: 6px; font-weight: 500; font-size: 0.9rem;">• A국을 찾는 해외 관광객의 증가</div>
+            <div style="margin-bottom: 12px; font-weight: 500; font-size: 0.9rem;">• 석유, 철강, 구리 등 국제 주요 원자재 가격 하락 안정화</div>
+            <div style="text-align: center; border: 1px solid var(--border-color); background: #f8fafc; padding: 12px; border-radius: 6px;">
+              <div style="font-weight: bold; margin-bottom: 2px; text-align: left; font-size: 0.85rem;">물가 ▲</div>
+              <div style="position: relative; height: 140px; margin: 10px 20px;">
+                <!-- Axis lines -->
+                <div style="position: absolute; left: 0; bottom: 0; width: 100%; height: 2px; background: #000;"></div>
+                <div style="position: absolute; left: 0; bottom: 0; width: 2px; height: 100%; background: #000;"></div>
+                <div style="position: absolute; left: -10px; bottom: -5px; font-size: 0.8rem;">0</div>
+                <div style="position: absolute; right: -30px; bottom: -8px; font-size: 0.8rem;">총생산 ▶</div>
+                
+                <!-- Curves with labels -->
+                <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: visible;" viewBox="0 0 200 120">
+                  <line x1="20" y1="10" x2="180" y2="110" stroke="#000" stroke-width="1.5" />
+                  <line x1="20" y1="110" x2="180" y2="10" stroke="#000" stroke-width="1.5" />
+                  <text x="100" y="32" font-size="12" text-anchor="middle" font-weight="bold">(ㄱ)</text>
+                  <text x="155" y="65" font-size="12" text-anchor="middle" font-weight="bold">(ㄴ)</text>
+                  <text x="100" y="95" font-size="12" text-anchor="middle" font-weight="bold">(ㄷ)</text>
+                  <text x="45" y="65" font-size="12" text-anchor="middle" font-weight="bold">(ㄹ)</text>
+                  <circle cx="100" cy="60" r="3" fill="#000" />
+                  <text x="112" y="64" font-size="12" font-weight="bold">e</text>
+                </svg>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 5px; font-weight: bold;">
+                <span>총공급</span>
+                <span>총수요</span>
+              </div>
+            </div>
+          </div>
+        `,
+        options: [
+          "① ㄱ",
+          "② ㄴ",
+          "③ ㄷ",
+          "④ ㄹ",
+          "⑤ 변화 없음"
+        ],
+        answer: 2,
+        explanation: "[정답 해설]\n• ② ㄴ (정답): 관광객 증가(총수요 우측 이동)와 원자재가 하락(총공급 우측 이동)이 동시에 발생하므로 국민소득(총생산)이 확실히 증가하는 ㄴ 방향으로 이동합니다.\n\n[오답 보기 해설]\n• ①, ③, ④, ⑤: 균형점의 이동 방향과 일치하지 않는 오답입니다."
+      },
+      {
+        id: 67,
+        category: "[경제] 실업유형",
+        question: "67. 다음 중 아래 사례 (가), (나)와 관련 깊은 실업의 유형을 가장 올바르게 짝지은 것은?",
+        boxContent: "(가) 최근 건설업계의 침체가 장기화되면서 건설사들의 고용 규모가 현저히 감소하였다. 고금리와 원자재 가격 급등, 부동산 시장 침체 등이 복합적으로 작용하고 있다.<br>(나) '일과 삶의 균형'을 중시하는 문화가 확산되면서 집과 가까운 일자리를 찾기 위해 퇴직하는 경우가 늘고 있다.",
+        options: [
+          "① 가: 계절적실업<br>&nbsp;&nbsp;&nbsp;&nbsp;나: 마찰적실업",
+          "② 가: 계절적실업<br>&nbsp;&nbsp;&nbsp;&nbsp;나: 구조적실업",
+          "③ 가: 구조적실업<br>&nbsp;&nbsp;&nbsp;&nbsp;나: 경기적실업",
+          "④ 가: 경기적실업<br>&nbsp;&nbsp;&nbsp;&nbsp;나: 구조적실업",
+          "⑤ 가: 경기적실업<br>&nbsp;&nbsp;&nbsp;&nbsp;나: 마찰적실업"
+        ],
+        answer: 5,
+        explanation: "[정답 해설]\n• ⑤ 가: 경기적실업 - 나: 마찰적실업 (정답): (가)는 경기 침체로 인한 경기적 실업이며, (나)는 더 나은 직장 탐색을 위한 자발적 마찰적 실업입니다.\n\n[오답 보기 해설]\n• ①, ②, ③, ④: 실업 유형 매칭이 잘못되었습니다."
+      },
+      {
+        id: 68,
+        category: "[경제] 외부효과",
+        question: "68. 아래 사례에 대한 올바른 해석을 모두 고르면?",
+        boxContent: "과수원 인근에 양봉업자가 꿀을 생산하고 있을 경우, 꿀벌이 과수의 수분을 도와 열매가 많이 맺힌다. 그러나 과수원이 이득을 본 것에 대해 양봉업자에게 대가를 지불하지는 않는다.<br><br>[ 보기 ]<br>㉠ 양봉업자의 꿀 생산 과정에서 긍정적인 외부효과가 발생하고 있다.<br>㉡ 꿀 생산량은 사회적 최적수준에 미치지 못할 것이다.<br>㉢ 정부가 양봉업자에게 세금을 부과함으로써 시장실패를 교정할 수 있다.<br>㉣ 공장에서 오폐수를 배출하는 사례와 같은 형태의 시장실패가 발생하고 있다.",
+        options: ["① ㉠, ㉡", "② ㉠, ㉢", "③ ㉡, ㉢", "④ ㉡, ㉣", "⑤ ㉢, ㉣"],
+        answer: 1,
+        explanation: "[정답 해설]\n• ① ㉠, ㉡ (정답): 긍정적 외부효과(외부경제)가 발생하며 과소 생산되므로 사회적 최적수준에 못 미칩니다(㉠, ㉡).\n\n[오답 보기 해설]\n• ㉢ 보조금 지급을 통해 교정해야 합니다.\n• ㉣ 오폐수는 부정적 외부효과(외부불경제) 사례입니다."
+      },
+      {
+        id: 69,
+        category: "[경제] 국제무역",
+        question: "69. 위 기사의 밑줄 친 (가) '역사상 가장 어리석은 무역전쟁'의 적절한 근거로 가장 거리가 먼 것은?",
+        boxContent: `
+          <div style="background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; font-size: 0.9rem; line-height: 1.6;">
+            <div style="text-align: center; font-weight: bold; margin-bottom: 8px; font-size: 1rem; letter-spacing: 1px;">NEWS</div>
+            트럼프 행정부가 멕시코와 캐나다에 25%의 관세를 부과한다고 선언하면서 큰 파장을 불러일으키고 있다. 트럼프 대통령은 미국으로 유입되는 불법이민자와 마약(펜타닐) 유입 경로를 각국이 제거하기 전까지 관세를 유지할 것이라고 말했다.<br><br>
+            미국이 관세전쟁의 방아쇠를 당기자 멕시코와 캐나다도 같은 수준으로 관세를 올릴 것을 발표하는 등 무역 갈등이 심화되고 있다. 대미 수출에 대한 불확실성 확대로 인해 한국을 비롯한 아시아 증시도 큰 하락세를 보였다. 월스트리트저널은 (가) '역사상 가장 어리석은 무역전쟁'이 라고 비판하며 해당 조치가 미국경제에도 불리하게 작용할 것이라고 지적했다.
+          </div>
+        `,
+        options: [
+          "① 수입품 가격 상승에 따른 미국 소비자잉여의 감소",
+          "② 멕시코산 식료품에 대한 미국의 높은 의존도",
+          "③ 수입품 물가의 전반적인 상승",
+          "④ 미국 자동차 및 반도체 업계의 리쇼어링 기조",
+          "⑤ 교역량 감소에 따른 미국의 사회후생 손실(deadweight loss) 발생"
+        ],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ 미국 자동차 및 반도체 업계의 리쇼어링 기조 (정답-거리가 먼 것): 리쇼어링은 보호무역 정책의 배경이나 유도책일 수 있으나 무역전쟁의 피해를 비판하는 근거로는 거리가 멉니다.\n\n[오답 보기 해설]\n• ①, ②, ③, ⑤는 모두 관세 부과가 자국 경제에 미치는 악영향과 무역전쟁의 폐해를 지적하는 근거입니다."
+      },
+      {
+        id: 70,
+        category: "[경제] 게임이론",
+        question: "70. 아래 보수행렬은 이번 무역분쟁으로 인한 미국과 캐나다의 이해관계를 게임 상황으로 모사한 것이다. 다음 중 해당 게임의 균형으로 가장 올바른 것은? (단, 양국은 상대방의 선택을 관찰 못한다고 가정하며, 선지의 괄호는 '멕시코의 선택, 미국의 선택' 순서이다.)",
+        boxContent: `
+          <div style="max-width: 340px; margin: 0 auto; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: #fff;">
+            <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 0.9rem;">
+              <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="border-right: 1px solid var(--border-color); padding: 8px; background: #f1f5f9; position: relative; height: 50px;">
+                  <span style="position: absolute; bottom: 6px; left: 8px; font-size: 0.8rem;">캐나다</span>
+                  <span style="position: absolute; top: 6px; right: 8px; font-size: 0.8rem;">미국</span>
+                  <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top right, transparent calc(50% - 0.5px), var(--border-color) calc(50% - 0.5px), var(--border-color) calc(50% + 0.5px), transparent calc(50% + 0.5px));"></div>
+                </td>
+                <th style="padding: 8px; border-right: 1px solid var(--border-color); background: #f1f5f9;">관세부과</th>
+                <th style="padding: 8px; background: #f1f5f9;">무관세</th>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 10px; background: #f1f5f9; border-right: 1px solid var(--border-color); font-weight: bold;">관세부과</td>
+                <td style="padding: 12px; border-right: 1px solid var(--border-color); position: relative; height: 55px;">
+                  <span style="position: absolute; top: 4px; right: 8px; font-size: 0.85rem;">7</span>
+                  <span style="position: absolute; bottom: 4px; left: 8px; font-size: 0.85rem;">7</span>
+                  <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top right, transparent calc(50% - 0.5px), var(--border-color) calc(50% - 0.5px), var(--border-color) calc(50% + 0.5px), transparent calc(50% + 0.5px));"></div>
+                </td>
+                <td style="padding: 12px; position: relative; height: 55px;">
+                  <span style="position: absolute; top: 4px; right: 8px; font-size: 0.85rem;">5</span>
+                  <span style="position: absolute; bottom: 4px; left: 8px; font-size: 0.85rem;">12</span>
+                  <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top right, transparent calc(50% - 0.5px), var(--border-color) calc(50% - 0.5px), var(--border-color) calc(50% + 0.5px), transparent calc(50% + 0.5px));"></div>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 10px; background: #f1f5f9; border-right: 1px solid var(--border-color); font-weight: bold;">무관세</td>
+                <td style="padding: 12px; border-right: 1px solid var(--border-color); position: relative; height: 55px;">
+                  <span style="position: absolute; top: 4px; right: 8px; font-size: 0.85rem;">12</span>
+                  <span style="position: absolute; bottom: 4px; left: 8px; font-size: 0.85rem;">5</span>
+                  <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top right, transparent calc(50% - 0.5px), var(--border-color) calc(50% - 0.5px), var(--border-color) calc(50% + 0.5px), transparent calc(50% + 0.5px));"></div>
+                </td>
+                <td style="padding: 12px; position: relative; height: 55px;">
+                  <span style="position: absolute; top: 4px; right: 8px; font-size: 0.85rem;">10</span>
+                  <span style="position: absolute; bottom: 4px; left: 8px; font-size: 0.85rem;">10</span>
+                  <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top right, transparent calc(50% - 0.5px), var(--border-color) calc(50% - 0.5px), var(--border-color) calc(50% + 0.5px), transparent calc(50% + 0.5px));"></div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        `,
+        options: [
+          "① (무관세, 무관세)",
+          "② (무관세, 관세부과)",
+          "③ (관세부과, 무관세)",
+          "④ (관세부과, 관세부과)",
+          "⑤ (무관세, 관세부과), (관세부과, 무관세)"
+        ],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ (관세부과, 관세부과) (정답): 죄수의 딜레마 모형에 따라 양국 모두 우월전략이 '관세부과'이므로 내쉬균형은 (관세부과, 관세부과)입니다.\n\n[오답 보기 해설]\n• ①, ②, ③, ⑤: 우월전략 균형 분석 오류에 따른 오답입니다."
+      },
+      {
+        id: 71,
+        category: "[시사] 소비트렌드",
+        question: "71. 아래의 빈칸 ( A )에 들어간 올바른 용어는?",
+        boxContent: "최근 젊은 세대뿐 아니라 전 세대에서 ( A )이(가) 유행하고 있다. 이는 유명인이나 인플루언서의 소비 취향을 따라 제품이나 서비스를 구매하는 행위를 말한다. 하지만 단순히 맹목적으로 유명인의 행동을 따르는 것과는 다르다. ( A )은(는) 소비자가 자신의 가치관과 취향에 맞는 유명인을 선택하고, 그들의 추천을 신뢰하여 구매함으로써 제품 선택에 소요되는 시간을 줄이는 현대사회의 새로운 소비 방식이다.",
+        options: ["① 플렉스", "② 로컬 소비", "③ 디토 소비", "④ 셀프 브랜딩", "⑤ 리퍼럴 마케팅"],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 디토 소비 (정답): 특정 인물의 취향과 선택을 그대로 추종하여 구매하는 디토(Ditto) 소비 트렌드입니다.\n\n[오답 보기 해설]\n• ① 플렉스: 부와 성공의 과시적 소비입니다.\n• ② 로컬 소비: 지역 밀착형 소비입니다.\n• ④ 셀프 브랜딩: 자기 자신을 브랜드화하는 것입니다.\n• ⑤ 리퍼럴 마케팅: 추천인 보상 마케팅입니다."
+      },
+      {
+        id: 72,
+        category: "[시사] 조세정책",
+        question: "72. 아래의 빈칸 ( A )에 들어간 올바른 용어는?",
+        boxContent: "2024년 7월 27일 열린 'G20 재무장관 회의'에서 ( A ) 논의가 공식 의제로 채택되었다. ( A )는 자산이 10억 달러를 초과하는 전 세계의 초고액 자산가들에게 국제적으로 같은 수준인 연간 2%의 세금을 부과하자는 내용의 과세 정책이다. 이는 조세피난처로 국적을 바꿔 세금을 적게 내려는 고액 자산가들의 조세 회피 행동을 막으려는 취지에서 고안되었다.",
+        options: ["① 디지털세", "② 세계 기후기금", "③ 글로벌 부유세", "④ 글로벌 최저세율", "⑤ 연합 금융 거래세"],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 글로벌 부유세 (정답): 초고액 자산가를 대상으로 전 세계적 과세 공조를 추진하는 글로벌 부유세 도입 논의입니다.\n\n[오답 보기 해설]\n• ① 디지털세: 다국적 IT기업 대상 국가별 매출 과세입니다.\n• ④ 글로벌 최저세율: 법인세 최저한세율 도입입니다."
+      },
+      {
+        id: 73,
+        category: "[시사] 산업경제",
+        question: "73. 아래의 빈칸 ( A )에 들어간 올바른 용어는?",
+        boxContent: "( A )은 모방할 수 없는 독보적인 기술력을 보유하여 글로벌 공급망에서 핵심 지위를 확보한 시장주도 기업을 말한다. 뛰어난 기술력으로 산업 내 대체가 불가능하여 실질적으로는 갑의 위치에 있는 경우가 많다. 최근 정부는 글로벌 공급망 위기에 대응하기 위해 ( A ) 육성 프로젝트를 추진 중이다.",
+        options: ["① 벤처기업", "② 스타트업", "③ 슈퍼을 기업", "④ 소부장 기업", "⑤ 사회적 기업"],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 슈퍼을 기업 (정답): 대체 불가능한 독점적 기술력을 지녀 강력한 시장 지배력을 행사하는 '슈퍼 을' 기업입니다.\n\n[오답 보기 해설]\n• ① 벤처기업, ② 스타트업은 신생 혁신 기업 통칭입니다.\n• ④ 소부장: 소재·부품·장비 기업입니다."
+      },
+      {
+        id: 74,
+        category: "[시사] IT·보안",
+        question: "74. 아래의 빈칸 ( A )에 들어간 올바른 용어는?",
+        boxContent: "현재 디지털 광고 산업은 서드파티 쿠키를 통해 사용자 데이터를 수집하여 이를 기반으로 맞춤형 광고를 제공한다. 하지만 최근 서드파티 쿠키를 통한 개인 정보침해 우려가 커졌다. 이에 따라 구글은 서드파티 쿠키를 제거하면서도 광고를 가능하게 하는 ( A )을(를) 개발중에 있다. ( A )은(는) 정보의 안전성과 정확도를 높여 개인 정보를 보호하고 광고의 효율성을 증대시키는 것을 목표로 한다.",
+        options: ["① 토픽 API", "② 파노라마 ID", "③ 코호트 연합 학습", "④ 퍼스트 파티 데이터", "⑤ 프라이버시 샌드박스"],
+        answer: 5,
+        explanation: "[정답 해설]\n• ⑤ 프라이버시 샌드박스 (정답): 쿠키 폐지에 대응해 사용자 프라이버시를 보호하면서 타겟 광고를 지원하는 구글의 보안 오픈소스 프로젝트입니다.\n\n[오답 보기 해설]\n• ①, ②, ③, ④: 관련 기술이나 데이터 수집 관련 용어이나 본문 설명에 해당하지 않습니다."
+      },
+      {
+        id: 75,
+        category: "[시사] 연금제도",
+        question: "75. 아래의 빈칸 ( A )에 들어갈 올바른 용어는?",
+        boxContent: "최근 ( A )은(는) 인구 고령화 and 경제 상황 변화에 따라 재정 안정성을 유지하기 위해 보험료율과 수급연령 등을 자동으로 조정하는 자동조정장치를 도입키로 하였다. 하지만 정부가 추진 중인 자동조정장치가 도입된다면 현 20~50대의 급여액은 현행 제도 기준보다 총 7,000만 원 넘게 줄어드는 것으로 나타나 논란이 되고 있다.",
+        options: ["① 기초연금", "② 실업급여", "③ 국민연금", "④ 국민건강보험", "⑤ 노인장기요양보험"],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 국민연금 (정답): 재정 안정화를 위해 자동조정장치 도입 논란이 벌어지고 있는 공적 연금 제도는 국민연금입니다.\n\n[오답 보기 해설]\n• ①, ②, ④, ⑤: 자동조정장치 논의가 중심이 되는 해당 기사의 대상 제도가 아닙니다."
+      },
+      {
+        id: 76,
+        category: "[시사] 빅테크",
+        question: "76. 아래의 빈칸 ( A )에 들어갈 올바른 용어는?",
+        boxContent: "중국의 대형 IT기업들이 ( A )가 바이트댄스, 판웨뒤 등 경쟁기업들의 부상으로 독보적인 지위가 위협받고 있다. 포털사이트 바이두(Baidu)는 대규모 언어모델의 등장으로 인터넷 검색 부문에서 점유율을 빼앗긴 위기에 처했으며, 동영상 및 게임 분야의 텐센트(Tencent)는 숏폼시장의 선점기회를 놓쳤다. 전자상거래로 시작해 다양한 분야로 확장해온 알리바바(Alibaba)는 본업인 전자상거래에서 판웨뒤에 밀리는 추세이다.",
+        options: ["① BAT", "② BRICs", "③ MAGA", "④ FAANG", "⑤ 매그니피센트7"],
+        answer: 1,
+        explanation: "[정답 해설]\n• ① BAT (정답): 바이두, 알리바바, 텐센트를 일컫는 중국 대형 테크 기업 그룹 약칭입니다.\n\n[오답 보기 해설]\n• ② BRICs: 신흥 경제 4국입니다.\n• ③ MAGA: 미국 빅테크 기업군입니다.\n• ④ FAANG: 미국 대표 IT 기업들입니다.\n• ⑤ 매그니피센트7: 미국 증시 주도 대형주 7개사입니다."
+      },
+      {
+        id: 77,
+        category: "[경제] 고용지표",
+        question: "77. 아래에서 설명하는 이것은?",
+        boxContent: "이것은 체감 실업률을 제대로 반영하기 위해 시간 관련 추가 취업가능자(근로 시간이 주당 36시간 이하이면서 추가로 취업을 원하는 사람)와 잠재경제활동인구(구직활동 유무와 무관하게 취업을 희망하고 취업이 가능한 사람)를 모두 포함해 구한 실업률이다. 2025년 11월 현재 실업률은 2.7%이지만, 이것은 8.4%로 나타났다.",
+        options: ["① 구인율", "② 자연실업", "③ 확장실업률", "④ 청년실업률", "⑤ 경제활동참가율"],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 확장실업률 (정답): 고용보조지표 3호인 확장실업률(체감실업률)에 대한 설명입니다.\n\n[오답 보기 해설]\n• ① 구인율: 미충원 인원 비율입니다.\n• ② 자연실업: 구조적·마찰적 실업률 합입니다.\n• ④ 청년실업률: 청년층 공식 실업률입니다.\n• ⑤ 경제활동참가율: 생산가능인구 대비 경제활동인구 비율입니다."
+      },
+      {
+        id: 78,
+        category: "[금융] 리스크관리",
+        question: "78. 아래에서 설명하는 이것은?",
+        boxContent: "이것은 금융기관의 자본 건전성과 위험 대응 능력을 점검하기 위한 시나리오 기반 분석 기법이다. 경기침체, 금리 급변, 금융시장 충격 등 극단적인 상황을 가정해 손실 규모와 자본 적정성을 평가하여 금융시스템 전반의 취약 요인을 사전에 파악하고 대비할 목적으로 갖고 있다.",
+        options: ["① VaR", "② 강건성 검증", "③ 델파이 기법", "④ 블랙박스 테스트", "⑤ 스트레스 테스트"],
+        answer: 5,
+        explanation: "[정답 해설]\n• ⑤ 스트레스 테스트 (정답): 극단적 경제 위기 상황을 가정하여 금융기관의 건전성을 평가하는 스트레스 테스트입니다.\n\n[오답 보기 해설]\n• ① VaR: 최대 예상 손실 금액 측정 지표입니다.\n• ② 강건성 검증: 시스템 안정성 평가 방식입니다.\n• ③ 델파이 기법: 전문가 예측 기법입니다.\n• ④ 블랙박스 테스트: 소프트웨어 테스트 기법입니다."
+      },
+      {
+        id: 79,
+        category: "[사회] 교육제도",
+        question: "79. 아래에서 설명하는 이것은?",
+        boxContent: "이것은 학생이 자신의 진로와 적성에 따라 과목을 선택하고 학점을 이수해 졸업하는 제도이다. 기존의 학년·반 중심 운영에서 벗어나 과목 선택권과 학습 자율성을 확대하는 것이 핵심이다. 2025년부터 모든 고등학교 1학전에 전면 도입되었다.",
+        options: ["① 평생교육", "② 현장실습", "③ 고교학점제", "④ 학사학위 연계과정", "⑤ 고교-대학 연계 심화과정"],
+        answer: 3,
+        explanation: "[정답 해설]\n• ③ 고교학점제 (정답): 학생이 진로에 따라 과목을 선택하고 이수 기준에 도달하면 학점을 취득하는 제도입니다.\n\n[오답 보기 해설]\n• ① 평생교육: 성인 대상 교육입니다.\n• ② 현장실습: 직무 실무 실습입니다.\n• ④, ⑤ 대학 연계 및 학위 과정입니다."
+      },
+      {
+        id: 80,
+        category: "[경제] 경제발전",
+        question: "80. 아래에서 설명하는 이것은?",
+        boxContent: "이것은 개발도상국에서 농촌의 저렴한 인력으로 급속한 산업발전을 이루지만, 농촌의 노동력이 도시로 이동하면서 노동력이 고갈되는 시점에 임금이 급등하고 성장이 둔화되는 현상을 뜻한다. 2010년대에 중국이, 그리고 2020년대 들어서는 베트남에서 이 현상이 나타나는 것으로 분석되고 있다.",
+        options: ["① 캐즘", "② 턴어라운드", "③ 창조적 파괴", "④ 루이스 전환점", "⑤ 양질 전환의 법칙"],
+        answer: 4,
+        explanation: "[정답 해설]\n• ④ 루이스 전환점 (정답): 잉여 노동력이 고갈되어 임금이 급등하고 경제 성장 체질이 바뀌는 변곡점인 루이스 전환점(Lewis turning point)입니다.\n\n[오답 보기 해설]\n• ① 캐즘: 신기술 수용의 일시적 정체기입니다.\n• ② 턴어라운드: 실적 호전입니다.\n• ③ 창조적 파괴: 혁신에 의한 경제 체제 갱신입니다.\n• ⑤ 양질 전환의 법칙: 철학적 발전 법칙입니다."
+      }
+    ];
+
+    let currentQuestions = [...originalQuestions];
+    let currentIndex = 0;
+    let userAnswers = {};
+    let isWrongOnlyMode = false;
+    let clickTimers = {};
+
+    function initApp() {
+      document.getElementById('totalIndex').innerText = currentQuestions.length;
+      renderQuestion();
+      renderOMR();
+      updateScoreSummary();
+    }
+
+    function renderQuestion() {
+      if (!currentQuestions || currentQuestions.length === 0) return;
+      const q = currentQuestions[currentIndex];
+
+      document.getElementById('categoryBadge').innerText = q.category;
+      document.getElementById('currentIndex').innerText = currentIndex + 1;
+      document.getElementById('totalIndex').innerText = currentQuestions.length;
+      document.getElementById('questionTitle').innerHTML = q.question;
+
+      const qBox = document.getElementById('questionBox');
+      if (q.boxContent) {
+        qBox.style.display = 'block';
+        qBox.innerHTML = q.boxContent;
+      } else {
+        qBox.style.display = 'none';
+        qBox.innerHTML = '';
+      }
+
+      const optionsList = document.getElementById('optionsList');
+      optionsList.innerHTML = '';
+
+      const selectedOpt = userAnswers[q.id];
+      const reselectBtn = document.getElementById('reselectBtn');
+
+      q.options.forEach((optText, idx) => {
+        const optNum = idx + 1;
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerHTML = optText;
+
+        if (selectedOpt !== undefined) {
+          if (optNum === q.answer) {
+            btn.classList.add('correct');
+          } else if (optNum === selectedOpt) {
+            btn.classList.add('wrong');
+          }
+        }
+
+        btn.onclick = (e) => handleOptionClick(q.id, optNum, e);
+        btn.ontouchend = (e) => {
+          e.preventDefault();
+          handleOptionClick(q.id, optNum, e);
+        };
+
+        optionsList.appendChild(btn);
+      });
+
+      if (selectedOpt === undefined) {
+        reselectBtn.style.display = 'none';
+      } else {
+        reselectBtn.style.display = 'inline-block';
+      }
+
+      const expBox = document.getElementById('explanationBox');
+      if (selectedOpt !== undefined) {
+        expBox.style.display = 'block';
+        expBox.innerHTML = q.explanation.replace(/\n/g, '<br>');
+      } else {
+        expBox.style.display = 'none';
+        expBox.innerHTML = '';
+      }
+
+      document.getElementById('prevBtn').disabled = (currentIndex === 0);
+      document.getElementById('nextBtn').disabled = (currentIndex === currentQuestions.length - 1);
+
+      updateOMRActive();
+    }
+
+    function handleOptionClick(qId, optNum, event) {
+      const now = new Date().getTime();
+      const currentAns = userAnswers[qId];
+
+      if (currentAns === undefined) {
+        userAnswers[qId] = optNum;
+        renderQuestion();
+        renderOMR();
+        updateScoreSummary();
+        clickTimers[qId] = { time: now, opt: optNum };
+      } else {
+        const lastClick = clickTimers[qId];
+        if (lastClick && (lastClick.opt === optNum || (now - lastClick.time < 600))) {
+          nextQuestion();
+        } else {
+          clickTimers[qId] = { time: now, opt: optNum };
+        }
+      }
+    }
+
+    function reselectAnswer() {
+      const q = currentQuestions[currentIndex];
+      if (confirm(`Q${q.id}번의 선택한 답을 초기화하고 다시 풀시겠습니까?`)) {
+        delete userAnswers[q.id];
+        renderQuestion();
+        renderOMR();
+        updateScoreSummary();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    }
+
+    function nextQuestion() {
+      if (currentIndex < currentQuestions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      }
+    }
+
+    function renderOMR() {
+      const omrGrid = document.getElementById('omrGrid');
+      omrGrid.innerHTML = '';
+
+      currentQuestions.forEach((q, idx) => {
+        const item = document.createElement('div');
+        item.className = 'omr-item';
+        if (idx === currentIndex) item.classList.add('active');
+
+        const userAns = userAnswers[q.id];
+        let statusText = '-';
+        let statusClass = 'status-none';
+
+        if (userAns !== undefined) {
+          if (userAns === q.answer) {
+            statusText = '정답';
+            statusClass = 'status-correct';
+          } else {
+            statusText = '오답';
+            statusClass = 'status-wrong';
+          }
+        }
+
+        item.innerHTML = `
+          <span>Q${String(q.id).padStart(2, '0')}</span>
+          <span class="status-badge ${statusClass}">${statusText}</span>
+        `;
+
+        item.onclick = () => {
+          currentIndex = idx;
+          renderQuestion();
+        };
+
+        omrGrid.appendChild(item);
+      });
+    }
+
+    function updateOMRActive() {
+      const items = document.querySelectorAll('.omr-item');
+      items.forEach((item, idx) => {
+        if (idx === currentIndex) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+    }
+
+    function updateScoreSummary() {
+      let correctCount = 0;
+      originalQuestions.forEach(q => {
+        if (userAnswers[q.id] !== undefined) {
+          if (userAnswers[q.id] === q.answer) correctCount++;
+        }
+      });
+      document.getElementById('scoreSummary').innerText = `맞힘: ${correctCount} / ${originalQuestions.length}`;
+    }
+
+    function resetAndShuffle() {
+      if (confirm('모든 답안을 초기화하고 문제 순서를 섞으시겠습니까?')) {
+        isWrongOnlyMode = false;
+        userAnswers = {};
+        clickTimers = {};
+        currentQuestions = [...originalQuestions].sort(() => Math.random() - 0.5);
+        currentIndex = 0;
+        
+        document.getElementById('modeBadge').style.display = 'none';
+        document.getElementById('wrongOnlyBtn').style.display = 'inline-block';
+        document.getElementById('showAllBtn').style.display = 'none';
+        
+        initApp();
+      }
+    }
+
+    function filterWrongQuestions() {
+      const wrongList = originalQuestions.filter(q => userAnswers[q.id] !== undefined && userAnswers[q.id] !== q.answer);
+
+      if (wrongList.length === 0) {
+        alert('틀린 문제가 없습니다! (풀지 않았거나 모두 정답인 상태입니다)');
+        return;
+      }
+
+      isWrongOnlyMode = true;
+      currentQuestions = wrongList;
+      currentIndex = 0;
+
+      document.getElementById('modeBadge').innerText = `오답 복습 (${wrongList.length}개)`;
+      document.getElementById('modeBadge').style.display = 'inline-block';
+      document.getElementById('wrongOnlyBtn').style.display = 'none';
+      document.getElementById('showAllBtn').style.display = 'inline-block';
+
+      initApp();
+    }
+
+    function showAllQuestions() {
+      isWrongOnlyMode = false;
+      currentQuestions = [...originalQuestions];
+      currentIndex = 0;
+
+      document.getElementById('modeBadge').style.display = 'none';
+      document.getElementById('wrongOnlyBtn').style.display = 'inline-block';
+      document.getElementById('showAllBtn').style.display = 'none';
+
+      initApp();
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.code === 'Space' || e.key === ' ') {
+        e.preventDefault();
+        nextQuestion();
+      }
+    });
+
+    window.onload = initApp;
+  </script>
+</body>
+</html>
